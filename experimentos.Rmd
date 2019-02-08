@@ -119,13 +119,23 @@ ggplot(dados, aes(Exercicio, Saldo.Atual, fill = interaction(Tipo.de.Dívida, Mo
 
 ```
 
-
+Para o gráfico de linha, isso não funciona muito bem, pq ele tenta conectar os dados.
 
 ```{r}
-ggplot(dados, aes(x = Exercicio, y = Saldo.Atual, fill = Movimentação.Financeira)) +  # (1)
-  geom_line(aes(color = Movimentação.Financeira, group = Exercicio)) +
-  scale_fill_viridis_d() +
-  theme_minimal() + theme(text = element_text(family = "Calibri Light", colour = "grey20"),
-                          legend.position = "bottom")
+ggplot(dados, aes(x = Exercicio, y = Saldo.Atual, color = Movimentação.Financeira)) +  # (1)
+  geom_line(aes(group = Exercicio)) +
+  theme(legend.position = "bottom")
+
+ggplot(dados, aes(x = Exercicio, y = Saldo.Atual, color = Movimentação.Financeira)) +  # (1)
+  geom_line() +
+  theme(legend.position = "bottom")
+
+ggplot(dados, aes(x = Exercicio, y = Saldo.Atual, color = Movimentação.Financeira)) +  # (1)
+  geom_path() +
+  theme(legend.position = "bottom")
+
+ggplot(dados_movimentacao, aes(x = Exercicio, y = Valor, fill = Movimentação.Financeira, group = Movimentação.Financeira)) +  
+  geom_area() +
+  theme(legend.position = "bottom")
 ```
 
