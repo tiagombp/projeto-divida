@@ -228,7 +228,7 @@ plota <- function(ano, criterio) {
   plot_ly(
       type = "sankey",
       orientation = "h",
-      width = 300,
+      width = 500,
       height = 400,
       opacity = 0.6, 
       # será q isso controla a opacidade dos hovers? # nope, é hardcoded,
