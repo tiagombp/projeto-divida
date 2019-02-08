@@ -1,0 +1,131 @@
+---
+title: "experimentos_divida"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Pacotes.
+
+```{r pacotes}
+library(ckanr)
+library(readxl)
+library(readr)
+library(tidyverse)
+library(stringr)
+library(viridis)
+library(extrafont)
+library(purrr)
+loadfonts()
+```
+
+## Execução Orçamentária da Dívida
+
+São os dados disponíveis aqui:
+
+https://www.tesourotransparente.gov.br/ckan/dataset/execucao-orcamentaria-e-financeira-da-divida-publica-federal-por-nd
+
+e aqui:
+
+https://www.tesourotransparente.gov.br/ckan/dataset/execucao-orcamentaria-e-financeira-da-divida-publica-federal-por-fonte
+
+Vamos utilizar os dados por fonte de recursos.
+
+### Carga
+
+```{r carga-dados, echo=FALSE}
+### Leitura do Arquivo diretamente do ckan
+
+# por fonte: 0c7cf480-69a8-446c-9942-a01bd5abdd5a
+# por nd   : 530e012d-1f9d-41a9-8cab-49849313e018
+
+recurso_TT <- resource_show(id="0c7cf480-69a8-446c-9942-a01bd5abdd5a", url="https://apickan.tesouro.gov.br/ckan")
+download.file(recurso_TT$url, destfile = "./exec_divida.csv", mode = 'wb')
+tabela <- read.csv2("exec_divida.csv")
+```
+
+### Processamento inicial
+
+```{r}
+dados <- tabela %>%
+  filter(!is.na(Exercicio)) %>%
+  mutate(Fonte.Recursos.Código = str_pad(Fonte.Recursos.Código, 2, pad = "0"),
+         Grupo.Fonte = str_sub(Fonte.SOF.Código, 1, 1),
+         Tipo.de.Fonte = as.factor(ifelse(Fonte.Recursos.Código %in% c("43", "44"),
+                                          "Emissões",
+                                          as.character(Tipo.de.Fonte))),
+         Exercicio = as.factor(Exercicio))
+```
+
+### Visualizações iniciais
+
+Que variáveis seriam interessantes?
+
+Vamos usar o `purrr` para gerar várias visualizações semelhantes, para diferentes variáveis.
+
+```{r}
+plota_percentual_por_exercicio <- function(criterio) {
+  ggplot(dados, aes(x = Exercicio, y = Saldo.Atual, fill = !!sym(criterio))) +  # (1)
+  geom_col(position = "fill") +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_viridis_d() +
+  theme_minimal() + theme(text = element_text(family = "Calibri Light", colour = "grey20"),
+                          legend.position = "bottom")
+  }
+
+# (1) essa é a maneira de dizer pra ele que quero que ele interprete o parâmetro "criterio", que vai ser passado pelo map, como um objeto/variavel/coluna.
+
+criterios <- c("Tipo.de.Fonte", "Carteira", "Modalidade.da.Dívida", "Movimentação.Financeira")
+
+map(criterios, plota_percentual_por_exercicio)
+```
+
+Note que o gráfico de barras, usando o `geom_col`, que é igual ao `geom_bar(stat = "identity")`, usa os dados do jeito que estão. Por padrão, ele vai empilhando os eventuais fragmentos de dados. Por exemplo, vamos supor que queremos montar as barras por ano. Ou seja, o ano vai ser mapeado para o eixo `x`. Só que, para cada ano, o valor está fragmentado por vários critérios, de forma que o dataset apresenta vários registros para um mesmo ano, conforme os valores das demais variáveis. No plot, ele vai simplesmente empilhar todos esses fragmentos, de modo que consigo montar um gráfico de barras sem precisar fazer um sumário dos dados. Os gráficos abaixo tentam ilustrar isso. Posso pedir explicitamente para ele evidenciar algum fragmento, ou seja, colorindo os pedaços das barras conforme alguma variável, mas a altura total da barra não se altera.
+
+```{r}
+dados_movimentacao <- dados %>%
+  group_by(Exercicio, Movimentação.Financeira) %>%
+  summarise(Valor = sum(Saldo.Atual))
+
+ggplot(dados_movimentacao, aes(Exercicio, Valor, fill = Movimentação.Financeira)) + geom_col(position = "dodge") + theme(legend.position = "bottom") + labs(title = "position dodge")
+
+ggplot(dados_movimentacao, aes(Exercicio, Valor, fill = "só para ter uma legenda aqui")) + geom_col() + theme(legend.position = "bottom") + labs(title = "sem position, sem sumarizar")
+
+ggplot(dados_movimentacao, aes(Exercicio, Valor, fill = Movimentação.Financeira)) + geom_col() + theme(legend.position = "bottom") + labs(title = "sem position")
+
+ggplot(dados_movimentacao, aes(Exercicio, Valor, fill = Movimentação.Financeira)) + geom_col(position = "stack") + theme(legend.position = "bottom") + labs(title = "Position = stack")
+
+ggplot(dados, aes(Exercicio, Saldo.Atual, fill = Movimentação.Financeira)) + 
+  geom_col(position = "stack") + 
+  labs(title = "sem sumarizar o dado e position = stack", fill = NULL) +
+  theme(legend.position = "bottom",
+        legend.text = element_text(size = 7))
+
+ggplot(dados_movimentacao, aes(Exercicio, Valor, fill = Movimentação.Financeira)) + geom_col(position = "fill") + theme(legend.position = "bottom") + labs(title = "Position = fill")
+
+ggplot(dados, aes(Exercicio, Saldo.Atual, fill = Movimentação.Financeira)) + 
+  geom_col(position = "fill") + 
+  labs(title = "sem sumarizar o dado e position = fill", fill = NULL) +
+  theme(legend.position = "bottom",
+        legend.text = element_text(size = 7))
+
+ggplot(dados, aes(Exercicio, Saldo.Atual, fill = interaction(Tipo.de.Dívida, Movimentação.Financeira))) + 
+  geom_col(position = "fill") + 
+  labs(title = "sem sumarizar o dado e position = fill, e interação", fill = NULL) +
+  theme(legend.position = "bottom",
+        legend.text = element_text(size = 7))
+
+```
+
+
+
+```{r}
+ggplot(dados, aes(x = Exercicio, y = Saldo.Atual, fill = Movimentação.Financeira)) +  # (1)
+  geom_line(aes(color = Movimentação.Financeira, group = Exercicio)) +
+  scale_fill_viridis_d() +
+  theme_minimal() + theme(text = element_text(family = "Calibri Light", colour = "grey20"),
+                          legend.position = "bottom")
+```
+
