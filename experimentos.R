@@ -5,6 +5,7 @@ library(tidyverse)
 library(stringr)
 library(viridis)
 library(extrafont)
+library(purrr)
 
 loadfonts()
 
@@ -20,6 +21,7 @@ tabela <- read.csv2("exec_divida.csv")
 ### Processamento dos dados
 
 dados <- tabela %>%
+  filter(!is.na(Exercicio)) %>%
   mutate(Fonte.Recursos.Código = str_pad(Fonte.Recursos.Código, 2, pad = "0"),
          Grupo.Fonte = str_sub(Fonte.SOF.Código, 1, 1),
          Tipo.de.Fonte = as.factor(ifelse(Fonte.Recursos.Código %in% c("43", "44"),
@@ -29,11 +31,24 @@ dados <- tabela %>%
 
 ### Visualizando um pouquinho
 
-ggplot(dados, aes(x = Exercicio, y = Saldo.Atual, fill = Tipo.de.Fonte)) + 
+plota_percentual_por_exercicio <- function(criterio) {
+  ggplot(dados, aes(x = Exercicio, y = Saldo.Atual, fill = !!sym(criterio))) +  # (1)
   geom_col(position = "fill") +
+  scale_y_continuous(labels = scales::percent) +
   scale_fill_viridis_d() +
-  theme_minimal() + theme(text = element_text(family = "Calibri", colour = "grey20"))
-  
+  theme_minimal() + theme(text = element_text(family = "Calibri Light", colour = "grey20"),
+                          legend.position = "bottom")
+  }
+
+# (1) essa é a maneira de dizer pra ele que quero que ele interprete o parâmetro "criterio", que vai ser passado pelo map, como um objeto/variavel/coluna.
+
+criterios <- c("Tipo.de.Fonte", "Carteira", "Modalidade.da.Dívida", "Movimentação.Financeira")
+
+map(criterios, plota_percentual_por_exercicio)
+
+
+ggplot(dados, aes(x = Exercicio, y = Saldo.Atual, fill = Tipo.de.Fonte)) +
+  geom_area()
   
 
 
