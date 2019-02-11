@@ -1,10 +1,21 @@
 ---
 title: "experimentos_divida"
-output: html_document
+output: 
+  html_document:
+    theme: cosmo
+    code_folding: hide
+    toc: yes
+    toc_float: yes
+  runtime: shiny
+
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE
+)
 ```
 
 Pacotes.
@@ -19,6 +30,7 @@ library(viridis)
 library(extrafont)
 library(purrr)
 library(plotly)
+library(shiny)
 loadfonts()
 
 tema <- function(){
@@ -84,7 +96,14 @@ dados <- tabela %>%
          Tipo.de.Fonte = as.factor(ifelse(Fonte.Recursos.Código %in% c("43", "44"),
                                           "Emissões",
                                           as.character(Tipo.de.Fonte))),
-         Exercicio = as.factor(Exercicio))
+         Exercicio = as.factor(Exercicio),
+         Saldo.Atual = as.numeric(str_replace(as.character(Saldo.Atual), ",", ".")),
+         Saldo.Atual = ifelse(is.na(Saldo.Atual), 0, Saldo.Atual)) # (1)
+
+# (1) o pessoal da codiv passou a colocar um " -   " no lugar dos zeros :/
+
+
+  
 ```
 
 ### Visualizações iniciais
@@ -170,7 +189,7 @@ plota_percentual_por_exercicio_area <- function(criterio) {
        y = "R$ bi",
        x = NULL,
        fill = NULL) +
-  tema()
+  tema() + theme(legend.position = "bottom")
 }
 
 map(criterios, plota_percentual_por_exercicio_area)
@@ -280,5 +299,29 @@ plota <- function(ano, criterio) {
 
 plota("2009", "Carteira")
   
+```
+
+### Teste shiny
+
+```{r}
+
+intervalo_anos <- as.numeric(as.character(unique(dados_tidy$Ano)))
+
+sliderInput("ano", "Escolha o exercício", 2009, min = min(intervalo_anos) , max = max(intervalo_anos), sep = "")
+
+radioButtons("criterios", "Escolha a variável", choices = c("Mod", "Carteira", "Mov"), selected = "Mov")
+
+renderPlotly({
+  plota(as.character(input$ano), input$criterios)
+})
+
+
+
+```
+
+### Teste shiny com fontes
+
+```{r}
+
 ```
 
