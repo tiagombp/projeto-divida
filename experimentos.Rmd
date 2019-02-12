@@ -7,7 +7,6 @@ output:
     toc: yes
     toc_float: yes
   runtime: shiny
-
 ---
 
 ```{r setup, include=FALSE}
@@ -433,18 +432,20 @@ renderPlotly({
 
 ```{r}
 dados_tidy_2 <- dados %>%
-  mutate(Fonte_cod = str_pad(Fonte.Recursos.Código, 2, pad = "0")) %>%
+  mutate(Fonte_cod = paste(
+    str_pad(`Fonte.Recursos.Código`, 2, pad = "0"),
+    Fonte.Recursos.Nome)) %>%
   group_by(Ano = Exercicio, 
            Fonte = Tipo.de.Fonte,
            Fonte_cod,
-           Mod = Modalidade.da.Dívida, 
+           Mod = `Modalidade.da.Dívida`, 
            Carteira, 
-           Mov = Movimentação.Financeira) %>%
+           Mov = `Movimentação.Financeira`) %>%
   summarise(Valor = sum(Saldo.Atual)) %>%
   ungroup()
 ```
 
-Teste
+#### Teste estático
 
 ```{r}
 dadinhos <- dados_tidy_2 %>%
@@ -453,7 +454,8 @@ dadinhos <- dados_tidy_2 %>%
            meiuca  = Fonte,
            destino = Mov) %>%
   summarise(Valor = sum(Valor)) %>%
-  arrange(meiuca)
+  ungroup() %>%
+  arrange(meiuca, Valor)
 
 qde_grupos_fontes <- length(unique(dados_tidy_2$Fonte))
 
@@ -498,11 +500,17 @@ origem_meiuca <- dadinhos %>%
          trg = meiuca)
 
 ## abre parênteses
-gerar tabela de cores.
+
+# gerar tabela de cores.
 
 tbl_cores_origens <- origem_meiuca %>%
   select("nomes_nos" = src, cor_no)
 
+tbl_cores_nos <- rbind(tbl_cores_origens,
+                       tbl_cores_fontes[,-3], #para tirar a coluna cor_ramo
+                       tbl_cores_destinos) %>% 
+  left_join(tbl_nos) %>%
+  arrange(numeros_nos)
 
 
 ##
@@ -521,7 +529,8 @@ matriz <- rbind(origem_meiuca, meiuca_destino) %>%
   left_join(tbl_nos, by = c("src" = "nomes_nos")) %>%
   rename("no_src" = numeros_nos) %>%
   left_join(tbl_nos, by = c("trg" = "nomes_nos")) %>%
-  rename("no_trg" = numeros_nos)
+  rename("no_trg" = numeros_nos) %>%
+  select(-cor_no)
 
 plot_ly(
       type = "sankey",
@@ -538,8 +547,8 @@ plot_ly(
       ),
   
       node = list(
-        label = nomes_nos,
-        color = cores_nos,
+        label = tbl_cores_nos$nomes_nos,
+        color = tbl_cores_nos$cor_no,
         pad = 10,
         thickness = 25,
         line = list(
@@ -555,10 +564,10 @@ plot_ly(
        ),
   
       link = list(
-        source = matriz$src,
-        target = matriz$trg,
+        source = matriz$no_src,
+        target = matriz$no_trg,
         value  = matriz$Valor,
-        color  = matriz$cor
+        color  = matriz$cor_ramo
        #color =  "rgba(255,213,0,0.4)" 
        # para deixar a cor translucida, é preciso usar rgba
         
@@ -574,115 +583,187 @@ plot_ly(
   )
 ```
 
+#### Teste shiny
+
+definição da função
 
 ```{r}
 
-
+dados_sankey <- dados %>%
+  mutate(Fonte_cod = paste(
+    str_pad(`Fonte.Recursos.Código`, 2, pad = "0"),
+    Fonte.Recursos.Nome)) %>%
+  group_by(Ano = Exercicio, 
+           Fonte = Tipo.de.Fonte,
+           Fonte_cod,
+           Mod = `Modalidade.da.Dívida`, 
+           Carteira, 
+           Mov = `Movimentação.Financeira`) %>%
+  summarise(Valor = sum(Saldo.Atual)) %>%
+  ungroup()
 
 # funções
 
-gera_matriz(dados, ano, criterio, apenas_mercado) {
-  
-}
-
-
-
-
-plota_b <- function(ano, criterio, apenas_mercado) {
-  
+plota_sankey <- function(ano, criterio, apenas_mercado) {
   if (apenas_mercado) {
-    dadinhos <- dados_tidy2 %>% filter(Carteira == "MERCADO")
+    dadinhos <- dados_sankey %>% filter(Carteira == "MERCADO")
     }
-    else {
-      dadinhos <- dados_tidy2
+  else {
+    dadinhos <- dados_sankey
     }
-
+  
   dadinhos <- dadinhos %>%
     filter(Ano == ano) %>%
     group_by(origem  = Fonte_cod,
              meiuca  = Fonte,
              destino = !!sym(criterio)) %>%
-    summarise(Valor = sum(Valor))
+    summarise(Valor = sum(Valor)) %>%
+    ungroup() %>%
+    arrange(meiuca, Valor)
   
+  
+  qde_grupos_fontes <- length(unique(dados_tidy_2$Fonte))
+
   # tabela com nomes e números de nós
 
-  nomes_nos <- c(unique(as.character(dadinhos$origem)),
-                 unique(as.character(dadinhos$destino)))
+  vetor_nos_origem  <- unique(as.character(dadinhos$origem))
+  vetor_nos_meiuca  <- unique(as.character(dadinhos$meiuca))
+  vetor_nos_destino <- unique(as.character(dadinhos$destino))
+
+  nomes_nos <- c(vetor_nos_origem,
+                 vetor_nos_meiuca,
+                 vetor_nos_destino)
   
   numeros_nos <- 0:(length(nomes_nos)-1)
   
   tbl_nos <- data.frame(nomes_nos, numeros_nos)
   
-  # cores. cores dos nos e tabela de cores para os ramos, conforme a origem.
-  
-  cores_nos <- viridis(length(nomes_nos))
-  
-  qde_cores_origem <- length(unique(dadinhos$origem))
-  tbl_cores <- data.frame("src" = 0:(qde_cores_origem-1), 
-                          "cor" = viridis(length(nomes_nos)-1, 0.5)[1:qde_cores_origem]) # (1)
-  
-    # (1) porque o viridis parece que gera cores diferentes dependendo da quantidade de cores     solicitadas. tipo viridis(5)[2] != viridis(2)
-  
-  # matriz para o plotly
+  # cores. cores dos nos e tabela de cores para os ramos, conforme os grupos de fontes.
 
-  matriz <- dadinhos %>%
-    left_join(tbl_nos, by = c("origem" = "nomes_nos")) %>%
-    rename(src = numeros_nos) %>%
-    left_join(tbl_nos, by = c("destino" = "nomes_nos")) %>%
-    rename(trg = numeros_nos) %>%
-    left_join(tbl_cores)
+  qde_cores_necessarias <- qde_grupos_fontes + length(vetor_nos_destino)
 
+  paleta <- viridis(qde_cores_necessarias)
+  
+  cores_nos_fontes   <- paleta[1:qde_grupos_fontes]
+  cores_nos_destinos <- paleta[(qde_grupos_fontes + 1):qde_cores_necessarias]
+  cores_ramos <- viridis(qde_cores_necessarias, 0.5)[1:qde_grupos_fontes] # com alpha = 0.5
+  
+  tbl_cores_fontes <- data.frame("nomes_nos"  = vetor_nos_meiuca,
+                                 "cor_no"     = cores_nos_fontes,
+                                 "cor_ramo"   = cores_ramos) #  pq quero fixar as cores dos ramos de acordo com as fontes
+  
+  tbl_cores_destinos <- data.frame("nomes_nos" = vetor_nos_destino,
+                                   "cor_no"    = cores_nos_destinos)
+  
+  # a matriz (ou sua metade esquerda)
+  
+  origem_meiuca <- dadinhos %>%
+    group_by(origem, meiuca) %>%
+    summarise(Valor = sum(Valor)) %>%
+    ungroup() %>%
+    left_join(tbl_cores_fontes, by = c("meiuca" = "nomes_nos")) %>%
+    rename(src = origem,
+           trg = meiuca)
+
+  ## abre parênteses
+  
+  # gerar tabela de cores.
+  
+  tbl_cores_origens <- origem_meiuca %>%
+    select("nomes_nos" = src, cor_no)
+  
+  tbl_cores_nos <- rbind(tbl_cores_origens,
+                         tbl_cores_fontes[,-3], #para tirar a coluna cor_ramo
+                         tbl_cores_destinos) %>%
+    left_join(tbl_nos) %>%
+    arrange(numeros_nos)
+
+  ## fecha parênteses. metade direita.
+
+  meiuca_destino <- dadinhos %>%
+    group_by(meiuca, destino) %>%
+    summarise(Valor = sum(Valor)) %>%
+    ungroup() %>%
+    left_join(tbl_cores_fontes, by = c("meiuca" = "nomes_nos")) %>%
+    select(-cor_no) %>%
+    left_join(tbl_cores_destinos, by = c("destino" = "nomes_nos")) %>%
+    rename(src = meiuca,
+           trg = destino)
+  
+  matriz <- rbind(origem_meiuca, meiuca_destino) %>%
+    left_join(tbl_nos, by = c("src" = "nomes_nos")) %>%
+    rename("no_src" = numeros_nos) %>%
+    left_join(tbl_nos, by = c("trg" = "nomes_nos")) %>%
+    rename("no_trg" = numeros_nos) %>%
+    select(-cor_no)
+  
+  # plotar
+  
   plot_ly(
-      type = "sankey",
-      orientation = "h",
-      opacity = 0.6, 
-      # será q isso controla a opacidade dos hovers? # nope, é hardcoded,
-      #valueformat = ">-.3~g",
-      #valuesuffix = " bilhões de reais",
+        type = "sankey",
+        orientation = "h",
+        opacity = 0.6,
+        textfont = list(
+          family = "Calibri Light",
+          color = "#444444",
+          size = 12
+        ),
   
-      textfont = list(
-        family = "Calibri Light",
-        color = "#444444",
-        size = 12
-      ),
+        node = list(
+          label = tbl_cores_nos$nomes_nos,
+          color = tbl_cores_nos$cor_no,
+          pad = 10,
+          thickness = 25,
+          line = list(
+            color = "",
+            width = 0
+          )
+        ),
   
-      node = list(
-        label = nomes_nos,
-        color = cores_nos,
-        pad = 10,
-        thickness = 25,
-        line = list(
-          color = "",
-          width = 0
+        hoverlabel = list(
+           font = list(
+             family = "Calibri Light"
+           )
+         ),
+  
+        link = list(
+          source = matriz$no_src,
+          target = matriz$no_trg,
+          value  = matriz$Valor,
+          color  = matriz$cor_ramo
+         #color =  "rgba(255,213,0,0.4)"
+         # para deixar a cor translucida, é preciso usar rgba
+  
         )
-      ),
-      
-      hoverlabel = list(
-         font = list(
-           family = "Calibri Light"
-         )
-       ),
-  
-      link = list(
-        source = matriz$src,
-        target = matriz$trg,
-        value  = matriz$Valor,
-        color  = matriz$cor
-       #color =  "rgba(255,213,0,0.4)" 
-       # para deixar a cor translucida, é preciso usar rgba
-        
-      )
-    ) %>% 
-    layout(
-      title = "",
-      font = list(
-        family = "Calibri Light",
-        size = 11,
-        color = "#004a93"
-      )
-  )
+      ) %>%
+      layout(
+        title = "",
+        font = list(
+          family = "Calibri Light",
+          size = 11,
+          color = "#004a93"
+        )
+    )
 }
-
-plota_b("2010", "Mod", FALSE)
 ```
+
+Painelzinho
+
+```{r}
+intervalo_anos <- as.numeric(as.character(unique(dados_sankey$Ano)))
+
+inputPanel(
+  sliderInput("ano", "Escolha o exercício", 2009, min = min(intervalo_anos) , max = max(intervalo_anos), sep = ""),
+  
+  radioButtons("criterios", "Escolha a variável", choices = c("Mod", "Carteira", "Mov"), selected = "Mov"),
+  
+  checkboxInput("carteira", "Apenas Mercado?", value = FALSE)
+)
+
+renderPlotly({
+  plota_sankey(as.character(input$ano), input$criterios, input$carteira)
+})
+
+```
+
 
