@@ -448,16 +448,20 @@ dados_tidy_2 <- dados %>%
 #### Teste estático
 
 ```{r}
+
+# uma fonte pode aparecer em mais de um grupo :/. vide 2010. para resolver isso, modificações com (*)
+
 dadinhos <- dados_tidy_2 %>%
-  filter(Ano == "2009") %>%
+  filter(Ano == "2010") %>%
   group_by(origem  = Fonte_cod,
            meiuca  = Fonte,
-           destino = Mov) %>%
+           destino = Mod) %>%
   summarise(Valor = sum(Valor)) %>%
   ungroup() %>%
   arrange(meiuca, Valor)
 
 qde_grupos_fontes <- length(unique(dados_tidy_2$Fonte))
+qde_grupos_fontes_selecao <- length(unique(dadinhos$meiuca))
 
 # tabela com nomes e números de nós
 
@@ -483,8 +487,8 @@ cores_nos_destinos <- paleta[(qde_grupos_fontes + 1):qde_cores_necessarias]
 cores_ramos <- viridis(qde_cores_necessarias, 0.5)[1:qde_grupos_fontes] # com alpha = 0.5
 
 tbl_cores_fontes <- data.frame("nomes_nos"  = vetor_nos_meiuca, 
-                               "cor_no" = cores_nos_fontes, 
-                               "cor_ramo"   = cores_ramos)
+                               "cor_no" = cores_nos_fontes[1:qde_grupos_fontes_selecao], 
+                               "cor_ramo"   = cores_ramos[1:qde_grupos_fontes_selecao])
 
 tbl_cores_destinos <- data.frame("nomes_nos"   = vetor_nos_destino,
                                  "cor_no" = cores_nos_destinos)
@@ -504,7 +508,13 @@ origem_meiuca <- dadinhos %>%
 # gerar tabela de cores.
 
 tbl_cores_origens <- origem_meiuca %>%
-  select("nomes_nos" = src, cor_no)
+  select("nomes_nos" = src, cor_no) %>%
+  group_by(nomes_nos) %>%
+  filter(row_number() == 1) %>% 
+  ungroup()
+
+# isso aqui para remover eventuais fontes que apareçam em mais de um grupo.
+
 
 tbl_cores_nos <- rbind(tbl_cores_origens,
                        tbl_cores_fontes[,-3], #para tirar a coluna cor_ramo
