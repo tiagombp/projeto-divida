@@ -30,7 +30,8 @@ library(extrafont)
 library(purrr)
 library(plotly)
 library(shiny)
-loadfonts()
+# loadfonts()
+# extrafont::font_import()
 
 tema <- function(){
     theme_minimal() +
@@ -73,27 +74,30 @@ Preparacao dos dados
 
 ```{r}
 rotulos_nivel1 <- c("EMISSÕES",
-                     "RESGATES")
+                    "RESGATES")
 
 rotulos_nivel2 <- c("DPMFi",
                     "DPFe")
 
 dados <- tabela %>%
-  filter(!is.na(.[1]))
+  rename(rotulos = 1) %>%
+  filter(!is.na(rotulos)) %>%
+  filter(!str_detect(rotulos, "Obs:"))
 
-resgates <- tabela %>%
-  filter(.[1] == "RESGATES") %>% # (1)
-  select(-1) %>% # (2)
-  gather(key = Mes_Ano, value = Valor) %>%
-  separate(Mes_Ano, into = c("Mes", "Ano"), sep = "/") %>%
-  filter(!is.na(Ano)) %>% # (3)
-  mutate(Ano = as.integer(paste0('20', Ano)), # (4)
-         Mes = factor(Mes, levels = c("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"))) %>%
-  filter(Ano > 2006) # (5)
+pos_nivel1 <- which(dados$rotulos %in% rotulos_nivel1)
+pos_nivel2 <- which(dados$rotulos %in% rotulos_nivel2)
 
-# (1) to filtrando pela primeira coluna.
-# (2) to excluindo essa coluna, pq não me interessa
-# (3) a tabela original possui colunas para os totais dos anos. quando uso o "separate", ele não encontra o "/" e gera um NA para o "Ano". Aqui estou removendo essas linhas.
-# (4) para o "Ano" ficar com 4 dígitos e em formato numérico.
-# (5) porque em 2006 só existem dados para novembro e dezembro.
+dados_2 <- dados %>%
+  mutate(nivel1 = ifelse(row_number() %in% pos_nivel1,
+                         rotulos,
+                         NA),
+         nivel2 = ifelse(row_number() %in% pos_nivel2,
+                         rotulos,
+                         NA)) %>%
+  fill(nivel1) %>%
+  fill(nivel2) %>%
+  filter(!(rotulos %in% c(rotulos_nivel1, rotulos_nivel2))) %>%
+  select(nivel1, nivel2, rotulos, everything())
+
+
 ```
