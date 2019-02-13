@@ -1,0 +1,99 @@
+---
+title: "experimentos_divida"
+output: 
+  html_document:
+    theme: cosmo
+    code_folding: hide
+    toc: yes
+    toc_float: yes
+  runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE
+)
+```
+
+Pacotes.
+
+```{r pacotes}
+library(ckanr)
+library(readxl)
+library(readr)
+library(tidyverse)
+library(stringr)
+library(viridis)
+library(extrafont)
+library(purrr)
+library(plotly)
+library(shiny)
+loadfonts()
+
+tema <- function(){
+    theme_minimal() +
+    theme(
+      text = element_text(family = "Calibri Light", colour = "grey20"),
+      title = element_text(face = "bold", size = 10, color = "#1E4C7A"), 
+      plot.subtitle = element_text(family = "Calibri Light", 
+                                   color = "grey20", face = "plain", size = 10),
+      axis.text = element_text(family = "Calibri Light", colour = "grey20", size = 8),
+      plot.caption = element_text(face = "italic"),
+      panel.grid.major = element_blank(), 
+      panel.grid.minor = element_blank(),
+      legend.text = element_text(size = 14),
+      legend.title = element_text(size = 14),
+      axis.ticks = element_line(size = 0.5),
+      axis.ticks.length = unit(.25, "cm"),
+      axis.title = element_text(size = 8, colour = "grey20"),
+      legend.position = 'none')
+}
+
+    # theme(legend.position = 'none',
+    #     panel.grid.major.y = element_blank(),
+    #     panel.grid.major.x = element_blank(),
+    #     axis.title.y = element_blank(),
+    #     axis.text.y = element_blank(),
+    #     axis.ticks.y = element_blank(),
+    #     plot.background = element_rect(color = "#f0f5f7", linetype = "solid", size = 2))
+```
+
+## Emissões e resgates
+
+### Carga
+
+```{r carga-dados, echo=FALSE}
+### Leitura do Arquivo diretamente do ckan
+tabela <- read_excel("Anexo_RMD_Dez_18.xlsx", skip = 4, sheet = "1.2")
+```
+
+Preparacao dos dados
+
+```{r}
+rotulos_nivel1 <- c("EMISSÕES",
+                     "RESGATES")
+
+rotulos_nivel2 <- c("DPMFi",
+                    "DPFe")
+
+dados <- tabela %>%
+  filter(!is.na(.[1]))
+
+resgates <- tabela %>%
+  filter(.[1] == "RESGATES") %>% # (1)
+  select(-1) %>% # (2)
+  gather(key = Mes_Ano, value = Valor) %>%
+  separate(Mes_Ano, into = c("Mes", "Ano"), sep = "/") %>%
+  filter(!is.na(Ano)) %>% # (3)
+  mutate(Ano = as.integer(paste0('20', Ano)), # (4)
+         Mes = factor(Mes, levels = c("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"))) %>%
+  filter(Ano > 2006) # (5)
+
+# (1) to filtrando pela primeira coluna.
+# (2) to excluindo essa coluna, pq não me interessa
+# (3) a tabela original possui colunas para os totais dos anos. quando uso o "separate", ele não encontra o "/" e gera um NA para o "Ano". Aqui estou removendo essas linhas.
+# (4) para o "Ano" ficar com 4 dígitos e em formato numérico.
+# (5) porque em 2006 só existem dados para novembro e dezembro.
+```
