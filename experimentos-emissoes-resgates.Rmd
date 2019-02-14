@@ -73,6 +73,9 @@ tabela <- read_excel("Anexo_RMD_Dez_18.xlsx", skip = 4, sheet = "1.2")
 Preparacao dos dados
 
 ```{r}
+
+meses <- c("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
+
 rotulos_nivel1 <- c("EMISSÕES",
                     "RESGATES")
 
@@ -97,7 +100,31 @@ dados_2 <- dados %>%
   fill(nivel1) %>%
   fill(nivel2) %>%
   filter(!(rotulos %in% c(rotulos_nivel1, rotulos_nivel2))) %>%
+  mutate(rotulos = ifelse(rotulos == "Prefixados", "Prefixado", rotulos)) %>%
   select(nivel1, nivel2, rotulos, everything())
 
+dados_long <- dados_2 %>%
+  gather(contains("/"), key = "Mes_Ano", value = "Valor") %>%
+  separate(Mes_Ano, into = c("Mes", "Ano"), sep = "/") %>%
+  mutate(Ano = paste0('20', Ano),
+         Mes_num = match(Mes, meses),
+         Periodo = as.Date(paste0(Ano, "-",
+                                  str_pad(Mes_num, 2), "-",
+                                  "01")))
+
+dados_wide <- dados_long %>%
+  spread(key = nivel1, value = Valor, fill = 0) %>%
+  arrange(Periodo) %>%
+  mutate(emissoes_liq = ifelse(`EMISSÕES`>`RESGATES`, `EMISSÕES` - `RESGATES`, 0),
+         resgates_liq = ifelse(`EMISSÕES`>`RESGATES`, 0, `RESGATES` - `EMISSÕES`),
+         liquido = `EMISSÕES` - `RESGATES`)
+
+# this is beautiful!
+teste <- dados_wide %>% 
+  group_by(nivel2, rotulos, Ano) %>% 
+  mutate_at(vars(`EMISSÕES`:liquido), .funs = funs(no_ano = cumsum(.))) %>%
+  ungroup() %>%
+  group_by(nivel2, rotulos) %>%
+  mutate_at(vars(`EMISSÕES`:liquido), .funs = funs(ult_12 = zoo::rollapply(as.numeric(.), width = 12, FUN = sum, fill = NA, align = 'right')))
 
 ```
