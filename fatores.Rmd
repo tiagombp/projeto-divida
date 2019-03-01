@@ -171,26 +171,23 @@ dados_graf <- dados %>%
   mutate(prox_periodo = lead(Periodo, length(fatores_ordenados)),
          prox_estoque = lead(yend, length(fatores_ordenados)))
 
-  
+# save(dados_graf, file = "dados_exemplo.RData")
+
 
 ano <- 2018
 
-ggplot(dados_graf %>% filter(Ano %in% c("2017", "2018")), aes(y = y, yend = yend, x = Periodo, xend = Periodo)) +
+ggplot(dados_graf %>% filter(Ano %in% c("2017", "2018")), aes(y = y, yend = yend, xend = Periodo)) +
   geom_point(aes(x = Periodo, y = ifelse(fatores == "Estoque_ant", yend, NA))) +
   geom_label(aes(x = Periodo, y = ifelse(fatores == "Estoque_ant", yend-1e5, NA),
                  label = paste0(
                    format(round(yend/1e6,2), big.mark = ".", decimal.mark = ","),
                    " bi")), 
              family = "Source Sans Pro", fill = "dimgrey", color = "white", size = 2) +
-  geom_segment(aes(color = ifelse(fatores != "Resgates", 
+  geom_segment(aes(color = ifelse(fatores == "Estoque_ant", 
                                   "invisivel", 
                                   as.character(fatores)),
-                   x = Periodo),
-               position = position_nudge(x = 10), size = 2) +
-  geom_segment(aes(color = ifelse(fatores %in% c("Estoque_ant", "Resgates"), 
-                                  "invisivel", 
-                                  as.character(fatores)),
-                   x = Periodo), size = 2) +
+                   x = if_else(fatores == "Resgates", Periodo + 10, Periodo), # (1)
+                   xend = if_else(fatores == "Resgates", Periodo + 10, Periodo)), size = 2) +
   geom_segment(aes(x = Periodo + 10, 
                    xend = prox_periodo, 
                    y = ifelse(fatores == "Estoque_ant", prox_estoque, NA),
@@ -203,6 +200,9 @@ ggplot(dados_graf %>% filter(Ano %in% c("2017", "2018")), aes(y = y, yend = yend
   scale_y_continuous(labels = function(x) {format(x/1e6, big.mark = ".", decimal.mark = ",")}) +
   tema()
 
+# (1) por algum motivo, o ifelse normal não funciona aqui. Dá um erro de tipo. Pesquisar um dia.
+
+# limpar base pro Lucas.
 
 ```
 
