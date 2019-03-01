@@ -16,6 +16,7 @@ library(tidyverse)
 library(stringr)
 library(viridis)
 library(extrafont)
+library(RColorBrewer)
 library(purrr)
 library(plotly)
 library(shiny)
@@ -59,7 +60,7 @@ linhas_de_interesse <- c("Estoque anterior1",
                          "Variação Nominal",
                          "I.1.1 - Emissões",
                          "I.1.2 - Resgates",
-                         "I.2 - Juros Apropriados",
+                         "I.2 - Juros  Apropriados",
                          "II.1 - Transferência de carteira 11")
 
 fatores <- c("Estoque_ant",
@@ -93,6 +94,51 @@ dados <- tabela %>%
                                   "01")),
          valor = as.numeric(valor))
 
+# experimentos
+# para gráfico de área
+# Para poder fazer um gráfico de area, preciso segmentar o gráfico em grupo contíguos. Ou seja, agrupar as sequencias de negativos e positivos.
+
+serie_variacao <- dados %>% 
+  filter(fatores == "Variação") %>%
+  mutate(resultado = ifelse(valor < 0, "Positivo", "Negativo"))
+
+palavra_chave <- "Grupo_"
+i <- 1
+ultimo_grupo <- paste0("Grupo_", i)
+grupo <- c(ultimo_grupo)
+
+vetor <- serie_variacao$resultado
+
+for (j in 2:length(vetor)) {
+  if (vetor[j] != vetor[j-1]) {
+    i <- i+1
+    ultimo_grupo <- paste0("Grupo_", i)
+  }
+  grupo <- c(grupo, ultimo_grupo)
+}
+
+serie_variacao$grupos <- grupo
+
+serie_variacao <- serie_variacao %>%
+  mutate(var_acumulada = cumsum(valor))
+
+polar <- ggplot(serie_variacao, 
+                aes(x = Periodo, y = valor, fill = resultado, color = resultado, group = grupos)) +
+  geom_area() +
+  geom_line() +
+  scale_color_manual(values = c("Positivo" = azul, "Negativo" = vermelho)) + 
+  scale_fill_manual(values = c("Positivo" = azul_claro, "Negativo" = vermelho_claro)) + 
+  coord_polar() + 
+  scale_y_discrete(expand = expand_scale(add = c(-3e5,3e5))) + 
+  tema()
+
+polar2 <- ggplot(serie_variacao, 
+                aes(x = Periodo, y = valor, fill = resultado)) +
+  geom_col(color = NA) +
+  scale_fill_manual(values = c("Positivo" = azul, "Negativo" = vermelho)) + 
+  coord_polar() + 
+  scale_y_discrete(expand = expand_scale(add = c(-3e5,3e5))) + 
+  tema()
 
 ggplot(dados, aes(y = fatores, x = Mes, fill = valor)) + geom_tile(color = "white") +
   scale_fill_viridis() + 
@@ -100,7 +146,63 @@ ggplot(dados, aes(y = fatores, x = Mes, fill = valor)) + geom_tile(color = "whit
   scale_y_discrete(expand = expand_scale(add = c(4,0))) +
   facet_wrap(~Ano) + tema() + theme(legend.position = "right")
 
-ggplot(dados, )
+### fim experimentos
+
+# dados_graf <- dados %>%
+#   spread(fatores, value = valor) %>%
+#   mutate(Juros_x       = Estoque_ant,
+#          Juros_xend    = Estoque_ant + Juros,
+#          Emissoes_x    = Estoque_ant + Juros,
+#          Emissoes_xend = Estoque_ant + Juros + `Emissões`,
+#          Resgates_x    = Estoque_ant + Juros + `Emissões`,
+#          Resgates_xend = Estoque_ant + Juros + `Emissões` + Resgates)
+#   # tive uma ideia melhor...
+
+fatores_ordenados <- c("Estoque_ant", "Juros", "Emissões", "Resgates")
+
+dados_graf <- dados %>%
+  filter(fatores %in% fatores_ordenados) %>%
+  mutate(fatores = factor(fatores, levels = fatores_ordenados, ordered = TRUE)) %>%
+  arrange(Periodo, fatores) %>%
+  group_by(Periodo) %>%
+  mutate(yend = cumsum(valor),
+         y = lag(yend,1)) %>%
+  ungroup() %>%
+  mutate(prox_periodo = lead(Periodo, length(fatores_ordenados)),
+         prox_estoque = lead(yend, length(fatores_ordenados)))
+
+  
+
+ano <- 2018
+
+ggplot(dados_graf %>% filter(Ano %in% c("2017", "2018")), aes(y = y, yend = yend, x = Periodo, xend = Periodo)) +
+  geom_point(aes(x = Periodo, y = ifelse(fatores == "Estoque_ant", yend, NA))) +
+  geom_label(aes(x = Periodo, y = ifelse(fatores == "Estoque_ant", yend-1e5, NA),
+                 label = paste0(
+                   format(round(yend/1e6,2), big.mark = ".", decimal.mark = ","),
+                   " bi")), 
+             family = "Source Sans Pro", fill = "dimgrey", color = "white", size = 2) +
+  geom_segment(aes(color = ifelse(fatores != "Resgates", 
+                                  "invisivel", 
+                                  as.character(fatores)),
+                   x = Periodo),
+               position = position_nudge(x = 10), size = 2) +
+  geom_segment(aes(color = ifelse(fatores %in% c("Estoque_ant", "Resgates"), 
+                                  "invisivel", 
+                                  as.character(fatores)),
+                   x = Periodo), size = 2) +
+  geom_segment(aes(x = Periodo + 10, 
+                   xend = prox_periodo, 
+                   y = ifelse(fatores == "Estoque_ant", prox_estoque, NA),
+                   yend = ifelse(fatores == "Estoque_ant", prox_estoque, NA)),
+               linetype = "dotted") +
+  scale_color_manual(values = c("Juros" = "red", 
+                                "Emissões" = "firebrick",
+                                "Resgates" = "dodgerblue",
+                                "estoque" = NA)) +
+  scale_y_continuous(labels = function(x) {format(x/1e6, big.mark = ".", decimal.mark = ",")}) +
+  tema()
+
 
 ```
 
