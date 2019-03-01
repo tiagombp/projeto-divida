@@ -1,0 +1,127 @@
+---
+title: "fatores de variação"
+output: 
+  flexdashboard::flex_dashboard:
+    source_code: embed
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(ckanr)
+library(readxl)
+library(readr)
+library(tidyverse)
+library(stringr)
+library(viridis)
+library(extrafont)
+library(purrr)
+library(plotly)
+library(shiny)
+library(flexdashboard)
+# loadfonts()
+# extrafont::font_import()
+
+tema <- function(){
+    theme_minimal() +
+    theme(
+      text = element_text(family = "Source Sans Pro", colour = "grey20"),
+      title = element_text(face = "bold", size = 10, color = "#1E4C7A"), 
+      plot.subtitle = element_text(family = "Source Sans Pro", 
+                                   color = "grey20", face = "plain", size = 10),
+      axis.text = element_text(family = "Source Sans Pro", colour = "grey20", size = 8),
+      plot.caption = element_text(face = "italic"),
+      panel.grid.major = element_blank(), 
+      panel.grid.minor = element_blank(),
+      legend.text = element_text(size = 14),
+      legend.title = element_text(size = 14),
+      axis.ticks = element_line(size = 0.5),
+      axis.ticks.length = unit(.25, "cm"),
+      axis.title = element_text(size = 8, colour = "grey20"),
+      legend.position = 'none')
+}
+
+vermelho <- brewer.pal(3, name = "Set1")[1]
+azul <- "#1f476a" 
+
+vermelho_claro <- "#ee7576"
+azul_claro     <- "#2c90bf" # "#87b1d4"
+
+```
+
+```{r import-data, echo=FALSE}
+### Leitura do Arquivo diretamente do ckan
+tabela <- read_excel("Anexo_RMD_Dez_18.xlsx", skip = 4, sheet = "2.9")
+
+linhas_de_interesse <- c("Estoque anterior1",
+                         "Estoque mês em análise",
+                         "Variação Nominal",
+                         "I.1.1 - Emissões",
+                         "I.1.2 - Resgates",
+                         "I.2 - Juros Apropriados",
+                         "II.1 - Transferência de carteira 11")
+
+fatores <- c("Estoque_ant",
+                   "Estoque_atu",
+                   "Variação",
+                   "Emissões",
+                   "Resgates",
+                   "Juros",
+                   "Transf")
+
+tab_novos_titulos <- tibble(linhas_de_interesse, fatores)
+
+meses <- c("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
+
+colnames(tabela)[which(colnames(tabela) == "Out/16")+1] <- "Nov/16"
+colnames(tabela)[which(colnames(tabela) == "Out/17")+1] <- "Nov/17"
+# ^ por causa de um erro na planilha
+
+dados <- tabela %>%
+  filter(Indicadores %in% linhas_de_interesse) %>%
+  left_join(tab_novos_titulos, by = c("Indicadores" = "linhas_de_interesse")) %>%
+  select(-Indicadores) %>%
+  select(fatores, everything()) %>%
+  gather(-fatores, key = mes_ano, value = valor) %>%
+  filter(str_detect(mes_ano, "/")) %>%
+  separate(mes_ano, into = c("Mes", "Ano"), sep = "/") %>%
+  mutate(Ano = paste0('20', Ano),
+         Mes_num = match(Mes, meses),
+         Periodo = as.Date(paste0(Ano, "-",
+                                  str_pad(Mes_num, 2), "-",
+                                  "01")),
+         valor = as.numeric(valor))
+
+
+ggplot(dados, aes(y = fatores, x = Mes, fill = valor)) + geom_tile(color = "white") +
+  scale_fill_viridis() + 
+  coord_polar() +
+  scale_y_discrete(expand = expand_scale(add = c(4,0))) +
+  facet_wrap(~Ano) + tema() + theme(legend.position = "right")
+
+ggplot(dados, )
+
+```
+
+## Embedded Application
+
+It's also possible to embed an entire Shiny application within an R Markdown document using the `shinyAppDir` function. This example embeds a Shiny application located in another directory:
+
+```{r tabsets, echo=FALSE}
+shinyAppDir(
+  system.file("examples/06_tabsets", package = "shiny"),
+  options = list(
+    width = "100%", height = 550
+  )
+)
+```
+
+Note the use of the `height` parameter to determine how much vertical space the embedded application should occupy.
+
+You can also use the `shinyApp` function to define an application inline rather then in an external directory.
+
+In all of R code chunks above the `echo = FALSE` attribute is used. This is to prevent the R code within the chunk from rendering in the document alongside the Shiny components.
+
+
+
