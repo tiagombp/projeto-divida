@@ -63,15 +63,15 @@ linhas_de_interesse <- c("Estoque anterior1",
                          "I.2 - Juros  Apropriados",
                          "II.1 - Transferência de carteira 11")
 
-fatores <- c("Estoque_ant",
+lista_fatores <- c("Estoque_ant",
                    "Estoque_atu",
-                   "Variação",
-                   "Emissões",
+                   "Variacao",
+                   "Emissoes",
                    "Resgates",
                    "Juros",
                    "Transf")
 
-tab_novos_titulos <- tibble(linhas_de_interesse, fatores)
+tab_novos_titulos <- tibble(linhas_de_interesse, lista_fatores)
 
 meses <- c("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
 
@@ -83,7 +83,7 @@ dados <- tabela %>%
   filter(Indicadores %in% linhas_de_interesse) %>%
   left_join(tab_novos_titulos, by = c("Indicadores" = "linhas_de_interesse")) %>%
   select(-Indicadores) %>%
-  select(fatores, everything()) %>%
+  select(fatores = lista_fatores, everything()) %>%
   gather(-fatores, key = mes_ano, value = valor) %>%
   filter(str_detect(mes_ano, "/")) %>%
   separate(mes_ano, into = c("Mes", "Ano"), sep = "/") %>%
@@ -92,9 +92,14 @@ dados <- tabela %>%
          Periodo = as.Date(paste0(Ano, "-",
                                   str_pad(Mes_num, 2), "-",
                                   "01")),
-         valor = as.numeric(valor))
+         valor = as.numeric(valor)) %>%
+  spread(fatores, value = valor) %>%
+  mutate(transf_positiva = ifelse(Transf > 0, Transf, 0),
+         transf_negativa = ifelse(Transf > 0, 0,      Transf)) %>%
+  select(-Transf, -Variacao) %>%
+  gather(Emissoes:transf_negativa, key = "fatores", value = "valor")
 
-# experimentos
+### experimentos
 # para gráfico de área
 # Para poder fazer um gráfico de area, preciso segmentar o gráfico em grupo contíguos. Ou seja, agrupar as sequencias de negativos e positivos.
 
@@ -158,7 +163,9 @@ ggplot(dados, aes(y = fatores, x = Mes, fill = valor)) + geom_tile(color = "whit
 #          Resgates_xend = Estoque_ant + Juros + `Emissões` + Resgates)
 #   # tive uma ideia melhor...
 
-fatores_ordenados <- c("Estoque_ant", "Juros", "Emissões", "Resgates")
+unique(dados$fatores)
+
+fatores_ordenados <- c("Estoque_ant", "Juros", "Emissoes", "transf_positiva", "transf_negativa", "Resgates")
 
 dados_graf <- dados %>%
   filter(fatores %in% fatores_ordenados) %>%
@@ -177,18 +184,7 @@ dados_graf <- dados %>%
 ano <- 2018
 desloc <- 10
 
-fatores
-
-sub_base <- function(criterio) {
-  return(dados_graf %>% filter(Ano == "2018", 
-                               fatores == criterio))
-}
-
-sub_bases <- purrr::map(fatores, sub_base)
-names(sub_bases) <- fatores
-
-
-teste <- ggplot(dados_graf %>% filter(Ano %in% c("2017", "2018")), aes(y = y, yend = yend, xend = Periodo)) +
+teste <- ggplot(dados_graf, aes(y = y, yend = yend, xend = Periodo)) +
   geom_point(aes(x = Periodo, y = ifelse(fatores == "Estoque_ant", yend, NA))) +
   #geom_label(aes(x = Periodo, y = ifelse(fatores == "Estoque_ant", yend-1e5, NA),
   #               label = paste0(
@@ -196,7 +192,7 @@ teste <- ggplot(dados_graf %>% filter(Ano %in% c("2017", "2018")), aes(y = y, ye
   #                 " bi")), 
   #           family = "Source Sans Pro", fill = "dimgrey", color = "white", size = 2) +
   geom_segment(aes(color = ifelse(fatores == "Estoque_ant", 
-                                  "invisivel", 
+                                  "estoque", 
                                   as.character(fatores)),
                    x = if_else(fatores == "Resgates", Periodo + desloc, Periodo), # (1)
                    xend = if_else(fatores == "Resgates", Periodo + desloc, Periodo)), size = 2) +
@@ -211,15 +207,18 @@ teste <- ggplot(dados_graf %>% filter(Ano %in% c("2017", "2018")), aes(y = y, ye
                    yend = ifelse(fatores == "Resgates", y, NA)),
                linetype = "dotted") +
   scale_color_manual(values = c("Juros" = "red", 
-                                "Emissões" = "firebrick",
+                                "Emissoes" = "firebrick",
+                                "transf_positiva" = "lightcoral",
+                                "transf_negativa" = "lightblue",
                                 "Resgates" = "dodgerblue",
                                 "estoque" = NA)) +
   scale_y_continuous(labels = function(x) {format(x/1e6, big.mark = ".", decimal.mark = ",")}) +
+  labs(color = "Fator de Variação") +
   tema()
 
 # (1) por algum motivo, o ifelse normal não funciona aqui. Dá um erro de tipo. Pesquisar um dia.
 
-teste
+teste + theme(legend.position = "bottom", legend.text = element_text(size = 6))
 
 # limpar base pro Lucas.
 
@@ -227,22 +226,49 @@ ggplotly(teste)
 
 # teste plot_ly
 
+# preparacao
 
+fatores
+
+sub_base <- function(criterio) {
+  return(dados_graf %>% filter(fatores == criterio))
+}
+
+lista_fatores_plotly <- unique(dados_graf$fatores)
+
+sub_bases <- purrr::map(lista_fatores_plotly, sub_base)
+names(sub_bases) <- lista_fatores_plotly
+
+formata <- function(x){
+  paste0("R$", format(round(x/1e3, 2), big.mark = ".", decimal.mark = ","), " bi")
+}
+
+junta <- function(){
+  paste(!!sym("fatores"), "<br />",
+        !!sym("Periodo"), "<br />",
+        (formata(!!sym("valor"))))
+}
 
 plot_ly() %>%
   add_segments(data = sub_bases[["Juros"]], 
                x = ~Periodo, xend = ~Periodo, y = ~y, yend = ~yend, name = "Juros") %>%
-  add_segments(data = sub_bases[["Emissões"]], 
+  add_segments(data = sub_bases[["Emissoes"]], text = ~paste(fatores, "<br />",
+                                                             Periodo, "<br />",
+                                                             formata(valor)), hoverinfo = "text",
                x = ~Periodo, xend = ~Periodo, y = ~y, yend = ~yend, name = "Emissões") %>%
+  add_segments(data = sub_bases[["transf_positiva"]],
+               x = ~Periodo, xend = ~Periodo, y = ~y, yend = ~yend, name = "Transferências(+)") %>%
+  add_segments(data = sub_bases[["transf_negativa"]], 
+               x = ~Periodo, xend = ~Periodo, y = ~y, yend = ~yend, name = "Transferências(-)") %>%
   add_segments(data = sub_bases[["Resgates"]], 
-               x = ~Periodo+10, xend = ~Periodo+10, y = ~y, yend = ~yend, name = "Resgates") %>%
-  add_segments(data = sub_bases[["Emissões"]], 
-               x = ~Periodo, xend = ~Periodo + 10, y = ~yend, yend = ~yend,
+               x = ~Periodo+desloc, xend = ~Periodo+desloc, y = ~y, yend = ~yend, name = "Resgates") %>%
+  add_segments(data = sub_bases[["Emissoes"]], 
+               x = ~Periodo, xend = ~Periodo+desloc, y = ~yend, yend = ~yend,
                line = list(dash = "dot", width = 1), name = "") %>%
   add_segments(data = sub_bases[["Resgates"]], 
-               x = ~Periodo + 10, xend = ~prox_periodo, 
+               x = ~Periodo+desloc, xend = ~prox_periodo, 
                y = ~yend, yend = ~yend, line = list(dash = "dot", width = 1), name = "") %>%
-    add_markers(data = sub_bases[["Estoque_ant"]], 
+  add_markers(data = sub_bases[["Estoque_ant"]], 
               x = ~Periodo, y= ~valor, name = "Estoque")
 
 ```
