@@ -177,7 +177,18 @@ dados_graf <- dados %>%
 ano <- 2018
 desloc <- 10
 
-ggplot(dados_graf %>% filter(Ano %in% c("2017", "2018")), aes(y = y, yend = yend, xend = Periodo)) +
+fatores
+
+sub_base <- function(criterio) {
+  return(dados_graf %>% filter(Ano == "2018", 
+                               fatores == criterio))
+}
+
+sub_bases <- purrr::map(fatores, sub_base)
+names(sub_bases) <- fatores
+
+
+teste <- ggplot(dados_graf %>% filter(Ano %in% c("2017", "2018")), aes(y = y, yend = yend, xend = Periodo)) +
   geom_point(aes(x = Periodo, y = ifelse(fatores == "Estoque_ant", yend, NA))) +
   #geom_label(aes(x = Periodo, y = ifelse(fatores == "Estoque_ant", yend-1e5, NA),
   #               label = paste0(
@@ -208,28 +219,31 @@ ggplot(dados_graf %>% filter(Ano %in% c("2017", "2018")), aes(y = y, yend = yend
 
 # (1) por algum motivo, o ifelse normal não funciona aqui. Dá um erro de tipo. Pesquisar um dia.
 
+teste
+
 # limpar base pro Lucas.
 
+ggplotly(teste)
+
+# teste plot_ly
+
+
+
+plot_ly() %>%
+  add_segments(data = sub_bases[["Juros"]], 
+               x = ~Periodo, xend = ~Periodo, y = ~y, yend = ~yend, name = "Juros") %>%
+  add_segments(data = sub_bases[["Emissões"]], 
+               x = ~Periodo, xend = ~Periodo, y = ~y, yend = ~yend, name = "Emissões") %>%
+  add_segments(data = sub_bases[["Resgates"]], 
+               x = ~Periodo+10, xend = ~Periodo+10, y = ~y, yend = ~yend, name = "Resgates") %>%
+  add_segments(data = sub_bases[["Emissões"]], 
+               x = ~Periodo, xend = ~Periodo + 10, y = ~yend, yend = ~yend,
+               line = list(dash = "dot", width = 1), name = "") %>%
+  add_segments(data = sub_bases[["Resgates"]], 
+               x = ~Periodo + 10, xend = ~prox_periodo, 
+               y = ~yend, yend = ~yend, line = list(dash = "dot", width = 1), name = "") %>%
+    add_markers(data = sub_bases[["Estoque_ant"]], 
+              x = ~Periodo, y= ~valor, name = "Estoque")
+
 ```
-
-## Embedded Application
-
-It's also possible to embed an entire Shiny application within an R Markdown document using the `shinyAppDir` function. This example embeds a Shiny application located in another directory:
-
-```{r tabsets, echo=FALSE}
-shinyAppDir(
-  system.file("examples/06_tabsets", package = "shiny"),
-  options = list(
-    width = "100%", height = 550
-  )
-)
-```
-
-Note the use of the `height` parameter to determine how much vertical space the embedded application should occupy.
-
-You can also use the `shinyApp` function to define an application inline rather then in an external directory.
-
-In all of R code chunks above the `echo = FALSE` attribute is used. This is to prevent the R code within the chunk from rendering in the document alongside the Shiny components.
-
-
 
