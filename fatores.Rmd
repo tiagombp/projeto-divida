@@ -103,53 +103,53 @@ dados <- tabela %>%
 # para gráfico de área
 # Para poder fazer um gráfico de area, preciso segmentar o gráfico em grupo contíguos. Ou seja, agrupar as sequencias de negativos e positivos.
 
-serie_variacao <- dados %>% 
-  filter(fatores == "Variação") %>%
-  mutate(resultado = ifelse(valor < 0, "Positivo", "Negativo"))
+# serie_variacao <- dados %>% 
+#   filter(fatores == "Variação") %>%
+#   mutate(resultado = ifelse(valor < 0, "Positivo", "Negativo"))
+# 
+# palavra_chave <- "Grupo_"
+# i <- 1
+# ultimo_grupo <- paste0("Grupo_", i)
+# grupo <- c(ultimo_grupo)
+# 
+# vetor <- serie_variacao$resultado
+# 
+# for (j in 2:length(vetor)) {
+#   if (vetor[j] != vetor[j-1]) {
+#     i <- i+1
+#     ultimo_grupo <- paste0("Grupo_", i)
+#   }
+#   grupo <- c(grupo, ultimo_grupo)
+# }
+# 
+# serie_variacao$grupos <- grupo
 
-palavra_chave <- "Grupo_"
-i <- 1
-ultimo_grupo <- paste0("Grupo_", i)
-grupo <- c(ultimo_grupo)
-
-vetor <- serie_variacao$resultado
-
-for (j in 2:length(vetor)) {
-  if (vetor[j] != vetor[j-1]) {
-    i <- i+1
-    ultimo_grupo <- paste0("Grupo_", i)
-  }
-  grupo <- c(grupo, ultimo_grupo)
-}
-
-serie_variacao$grupos <- grupo
-
-serie_variacao <- serie_variacao %>%
-  mutate(var_acumulada = cumsum(valor))
-
-polar <- ggplot(serie_variacao, 
-                aes(x = Periodo, y = valor, fill = resultado, color = resultado, group = grupos)) +
-  geom_area() +
-  geom_line() +
-  scale_color_manual(values = c("Positivo" = azul, "Negativo" = vermelho)) + 
-  scale_fill_manual(values = c("Positivo" = azul_claro, "Negativo" = vermelho_claro)) + 
-  coord_polar() + 
-  scale_y_discrete(expand = expand_scale(add = c(-3e5,3e5))) + 
-  tema()
-
-polar2 <- ggplot(serie_variacao, 
-                aes(x = Periodo, y = valor, fill = resultado)) +
-  geom_col(color = NA) +
-  scale_fill_manual(values = c("Positivo" = azul, "Negativo" = vermelho)) + 
-  coord_polar() + 
-  scale_y_discrete(expand = expand_scale(add = c(-3e5,3e5))) + 
-  tema()
-
-ggplot(dados, aes(y = fatores, x = Mes, fill = valor)) + geom_tile(color = "white") +
-  scale_fill_viridis() + 
-  coord_polar() +
-  scale_y_discrete(expand = expand_scale(add = c(4,0))) +
-  facet_wrap(~Ano) + tema() + theme(legend.position = "right")
+# serie_variacao <- serie_variacao %>%
+#   mutate(var_acumulada = cumsum(valor))
+# 
+# polar <- ggplot(serie_variacao, 
+#                 aes(x = Periodo, y = valor, fill = resultado, color = resultado, group = grupos)) +
+#   geom_area() +
+#   geom_line() +
+#   scale_color_manual(values = c("Positivo" = azul, "Negativo" = vermelho)) + 
+#   scale_fill_manual(values = c("Positivo" = azul_claro, "Negativo" = vermelho_claro)) + 
+#   coord_polar() + 
+#   scale_y_discrete(expand = expand_scale(add = c(-3e5,3e5))) + 
+#   tema()
+# 
+# polar2 <- ggplot(serie_variacao, 
+#                 aes(x = Periodo, y = valor, fill = resultado)) +
+#   geom_col(color = NA) +
+#   scale_fill_manual(values = c("Positivo" = azul, "Negativo" = vermelho)) + 
+#   coord_polar() + 
+#   scale_y_discrete(expand = expand_scale(add = c(-3e5,3e5))) + 
+#   tema()
+# 
+# ggplot(dados, aes(y = fatores, x = Mes, fill = valor)) + geom_tile(color = "white") +
+#   scale_fill_viridis() + 
+#   coord_polar() +
+#   scale_y_discrete(expand = expand_scale(add = c(4,0))) +
+#   facet_wrap(~Ano) + tema() + theme(legend.position = "right")
 
 ### fim experimentos
 
@@ -220,9 +220,7 @@ teste <- ggplot(dados_graf, aes(y = y, yend = yend, xend = Periodo)) +
 
 teste + theme(legend.position = "bottom", legend.text = element_text(size = 6))
 
-# limpar base pro Lucas.
-
-ggplotly(teste)
+# ggplotly(teste)
 
 # teste plot_ly
 
@@ -249,7 +247,7 @@ junta <- function(){
         (formata(!!sym("valor"))))
 }
 
-plot_ly() %>%
+fatores_var <- plot_ly() %>%
   add_segments(data = sub_bases[["Juros"]], 
                x = ~Periodo, xend = ~Periodo, y = ~y, yend = ~yend, name = "Juros") %>%
   add_segments(data = sub_bases[["Emissoes"]], text = ~paste(fatores, "<br />",
@@ -271,5 +269,17 @@ plot_ly() %>%
   add_markers(data = sub_bases[["Estoque_ant"]], 
               x = ~Periodo, y= ~valor, name = "Estoque")
 
+```
+
+```{r}
+dados_sem_estoque <- dados_graf %>%
+  filter(fatores %in% c("Juros", "Emissoes", "Resgates")) %>%
+  select(Periodo, fatores, valor) %>%
+  spread(fatores, valor)
+
+fats <- plot_ly(data = dados_sem_estoque, x = ~Periodo) %>%
+  add_lines(y = ~Juros, name = "Juros") %>%
+  add_lines(y = ~Emissoes, name = "Emissoes") %>%
+  add_lines(y = ~Resgates, name = "Resgates")
 ```
 
