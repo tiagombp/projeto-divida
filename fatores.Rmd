@@ -275,11 +275,14 @@ fatores_var <- plot_ly() %>%
 dados_sem_estoque <- dados_graf %>%
   filter(fatores %in% c("Juros", "Emissoes", "Resgates")) %>%
   select(Periodo, fatores, valor) %>%
-  spread(fatores, valor)
+  spread(fatores, valor) %>%
+  mutate(variacao = Juros + Emissoes + Resgates,
+         sinal = ifelse(variacao > 0, "Positivo", "Negativo"))
 
 fats <- plot_ly(data = dados_sem_estoque, x = ~Periodo) %>%
-  add_lines(y = ~Juros, name = "Juros") %>%
-  add_lines(y = ~Emissoes, name = "Emissoes") %>%
-  add_lines(y = ~Resgates, name = "Resgates")
+  add_bars(y = ~Juros, name = "Juros") %>%
+  add_bars(y = ~Emissoes, name = "Emissoes") %>%
+  add_bars(y = ~Resgates, name = "Resgates") %>%
+  add_markers(y = ~variacao, name = "Variação", color = ~sinal, marker = list(colors = c("#4682B4", "#DC143C")))
 ```
 
