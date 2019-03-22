@@ -82,8 +82,9 @@ dados <- tabela %>%
                           Indicadores,
                           NA)) %>%
   fill(Fatores) %>%
-  mutate(TipoDivida = ife
+  mutate(TipoDivida = str_extract(Indicadores, paste(classificadores, collapse = "|"))) # (1)
   filter(Indicadores %in% linhas_de_interesse) %>%
+    
   left_join(tab_novos_titulos, by = c("Indicadores" = "linhas_de_interesse")) %>%
   select(-Indicadores) %>%
   select(fatores = lista_fatores, everything()) %>%
@@ -101,3 +102,5 @@ dados <- tabela %>%
          transf_negativa = ifelse(Transf > 0, 0,      Transf)) %>%
   select(-Transf, -Variacao) %>%
   gather(Emissoes:transf_negativa, key = "fatores", value = "valor")
+  
+# (1): Olha que coisa linda... no str_extract, ele procura, para o vetor dado as ocorrências do padrão desejado, e extrai o padrão. Neste caso, eu usei uma lista de padrões que estava definida num vetor ("classificadores"), e usei o paste/collapse para transformar essa lista em uma string do tipo "padrao1|padrao2|padrao3|etc.". Com isso, o que ele faz é detectar se um dos padrões está presente no elemento do vetor pesquisado ("Indicadores"), e retorna justamente o padrão. Perfeito para construir um classificador como o que eu queria aqui.
