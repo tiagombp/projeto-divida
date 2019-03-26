@@ -16,20 +16,22 @@ library(flexdashboard)
 library(plotly)
 
 # Define UI for application that draws a histogram
-ui <- fluidPage(
-   
-   # Application title
-   titlePanel("Fatores de Variação"),
-   
-   # Sidebar with a slider input for number of bins 
-   sidebarLayout(
-      sidebarPanel(
-      ),
-      mainPanel(
-         plotOutput("DPFe_completo")
-      )
+ui <- dashboardBody(
+   tabItem(tabName = "fatores",
+           fluidRow(
+             tabBox(id="graf_fatores",
+                    tabPanel("Fatores de Variação",
+                             tabBox(id="dpfe",
+                                    tabPanel("DPFe", plotlyOutput("DPFe_completo")
+                                    )
+                             )
+                    )
+             )
+           )
    )
 )
+
+
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
