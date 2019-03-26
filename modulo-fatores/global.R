@@ -205,7 +205,9 @@ gera_dados_sem_estoque <- function(dado) {
     spread(fatores, valor) %>%
     mutate(variacao = Juros + Emissoes + Resgates,
            var_pos = ifelse(variacao > 0, variacao, NA),
-           var_neg = ifelse(variacao < 0, variacao, NA))
+           var_neg = ifelse(variacao < 0, variacao, NA),
+           mes = meses[month(Periodo)],
+           ano = year(Periodo))
   
   return(dadinhos_sem_estoque)
 }
