@@ -150,7 +150,9 @@ gera_dados_graf_tipos <- function(tipo_divida) {
     ungroup() %>%
     mutate(prox_periodo = lead(Periodo, length(fatores_ordenados)),
            prox_estoque = lead(yend, length(fatores_ordenados))) %>%
-    left_join(tabela_nomes_fatores)
+    left_join(tabela_nomes_fatores) %>%
+    mutate(mes = meses[month(Periodo)],
+           ano = year(Periodo))
   
   return(dadinhos)
 }
