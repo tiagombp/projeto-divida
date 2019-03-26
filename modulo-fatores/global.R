@@ -118,6 +118,9 @@ dados <- tabela %>%
 # preparacao especifica para o grafico waterfall --------------------------
 
 fatores_ordenados <- c("Estoque_ant", "Juros", "Emissoes", "transf_positiva", "transf_negativa", "Resgates")
+fatores_nomes <- c("Estoque", "Juros", "Emissões", "Transferências (+)", "Transferências (-)", "Resgates")
+
+tabela_nomes_fatores <- tibble(fatores = fatores_ordenados, nomes = fatores_nomes)
 
 ## essa ideia aqui gerava uma super base, achei melhor separar antes.
 # dados_graf <- dados %>%
@@ -146,7 +149,8 @@ gera_dados_graf_tipos <- function(tipo_divida) {
            y = lag(yend,1)) %>%
     ungroup() %>%
     mutate(prox_periodo = lead(Periodo, length(fatores_ordenados)),
-           prox_estoque = lead(yend, length(fatores_ordenados)))
+           prox_estoque = lead(yend, length(fatores_ordenados))) %>%
+    left_join(tabela_nomes_fatores)
   
   return(dadinhos)
 }
