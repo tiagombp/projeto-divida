@@ -198,7 +198,8 @@ gera_dados_sem_estoque <- function(dado) {
     select(Periodo, fatores, valor) %>%
     spread(fatores, valor) %>%
     mutate(variacao = Juros + Emissoes + Resgates,
-           sinal = ifelse(variacao > 0, "Positivo", "Negativo"))
+           var_pos = ifelse(variacao > 0, variacao, NA),
+           var_neg = ifelse(variacao < 0, variacao, NA))
   
   return(dadinhos_sem_estoque)
 }
