@@ -4,6 +4,7 @@ library(shiny)
 library(shinydashboard)
 library(flexdashboard)
 library(plotly)
+library(RColorBrewer)
 
 server = function(input, output, session) { 
 
