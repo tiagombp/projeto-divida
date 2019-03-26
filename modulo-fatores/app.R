@@ -16,20 +16,18 @@ library(flexdashboard)
 library(plotly)
 
 # Define UI for application that draws a histogram
-ui <- dashboardBody(
-   tabItem(tabName = "fatores",
-           fluidRow(
+ui <- fluidRow(
              tabBox(id="graf_fatores",
                     tabPanel("Fatores de Variação",
                              tabBox(id="dpfe",
-                                    tabPanel("DPFe", plotlyOutput("DPFe_completo")
-                                    )
-                             )
+                                    tabPanel("DPFe", plotlyOutput("DPFe_completo"))),
+                             tabBox(id="dpmfi",
+                                    tabPanel("DPMFi", plotlyOutput("DPMFi_completo")))
                     )
              )
            )
-   )
-)
+   
+
 
 
 
@@ -76,6 +74,10 @@ server <- function(input, output) {
   
    output$DPFe_completo <- renderPlotly({
      plota_completo_por_tipo("DPFe")
+   })
+   
+   output$DPMFi_completo <- renderPlotly({
+     plota_completo_por_tipo("DPMFi")
    })
 }
 
