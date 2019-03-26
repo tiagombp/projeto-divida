@@ -8,8 +8,6 @@ library(RColorBrewer)
 
 header <- dashboardHeader(title = "Dívida Pública Federal", titleWidth = 270, tags$li(class="dropdown", tags$a(href="https://github.com/gt-cead", icon("github"), "Source Code", target ="_blank")))
 
-
-
 sidebar <- dashboardSidebar(width =270,
                             
                             sidebarSearchForm(label = "Procurar", "searchText", "searchButton"),
@@ -28,29 +26,25 @@ sidebar <- dashboardSidebar(width =270,
 body <- dashboardBody(
   
   tabItem(tabName = "fatores",
-            fluidRow(tabBox(id="graf_fatores", width = 1000, height=560,
+            fluidRow(
+              tabBox(id="graf_fatores", width = 1000, height=600,
                             tabPanel("Fatores de Variação e Estoque",
-                                     tabBox(id="DPMFi",
-                                            tabPanel("DPMFi", plotlyOutput("DPMFi_completo"))),
-                                     tabBox(id="DPFe",
-                                            tabPanel("DPFe", plotlyOutput("DPFe_completo"))),
-                                     tabBox(id="Total",
-                                            tabPanel("Total", plotlyOutput("Total_completo")))
-                            ),
+                                     tabBox(id="fatores_estoque", width = 1000, height=600,
+                                            tabPanel("DPMFi", plotlyOutput("DPMFi_completo")),
+                                            tabPanel("DPFe", plotlyOutput("DPFe_completo")),
+                                            tabPanel("Total", plotlyOutput("Total_completo"))
+                                            )
+                                     ),
                             tabPanel("Apenas fatores de Variação",
-                                     tabBox(id="DPMFi",
-                                            tabPanel("DPMFi_fat", 
-                                                     plotlyOutput("DPMFi_so_fatores"))),
-                                     tabBox(id="DPFe",
-                                            tabPanel("DPFe_fat", 
-                                                     plotlyOutput("DPFe_so_fatores"))),
-                                     tabBox(id="Total",
-                                            tabPanel("Total_fat", 
-                                                     plotlyOutput("Total_so_fatores")))
-                            )
-            )
-            )
-    )
+                                     tabBox(id="so_fatores", width = 1000, height=600,
+                                            tabPanel("DPMFi", plotlyOutput("DPMFi_so_fatores")),
+                                            tabPanel("DPFe", plotlyOutput("DPFe_so_fatores")),
+                                            tabPanel("Total", plotlyOutput("Total_so_fatores"))
+                                            )
+                                     )
+                     )
+              )
+          )
   )
 
 ui = dashboardPage(header, sidebar, body)
