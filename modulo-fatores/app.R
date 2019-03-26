@@ -17,22 +17,33 @@ library(flexdashboard)
 library(plotly)
 
 # Define UI for application that draws a histogram
-ui <- fluidRow(
-             tabBox(id="graf_fatores",
-                    tabPanel("Fatores de Variação e Estoque",
-                             tabBox(id="dpmfi_comp",
-                                    tabPanel("DPMFi", plotlyOutput("DPMFi_completo"))),
-                             tabBox(id="dpfe_comp",
-                                    tabPanel("DPFe", plotlyOutput("DPFe_completo")))
-                             ),
-                    tabPanel("Apenas fatores de Variação",
-                             tabBox(id="dpmfi",
-                                    tabPanel("DPMFi", plotlyOutput("DPMFi"))),
-                             tabBox(id="dpfe",
-                                    tabPanel("DPFe", plotlyOutput("DPFe")))
-                             )
-                    )
-             )
+ui <- bootstrapPage(
+  tabItem(tabName = "fatores",
+              fluidRow(tabBox(id="graf_fatores",
+                              tabPanel("Fatores de Variação e Estoque",
+                                       tabBox(id="dpmfi_comp",
+                                              tabPanel("DPMFi", plotlyOutput("DPMFi_completo"))),
+                                       tabBox(id="dpfe_comp",
+                                              tabPanel("DPFe", plotlyOutput("DPFe_completo"))),
+                                       tabBox(id="total_comp",
+                                             tabPanel("Total", plotlyOutput("Total_completo")))
+                              ),
+                              tabPanel("Apenas fatores de Variação",
+                                       tabBox(id="dpmfi_fat",
+                                              tabPanel("DPMFi_fat", 
+                                                       plotlyOutput("DPMFi_so_fatores"))),
+                                       tabBox(id="dpfe_fat",
+                                              tabPanel("DPFe_fat", 
+                                                       plotlyOutput("DPFe_so_fatores"))),
+                                       tabBox(id="total_fat",
+                                              tabPanel("Total_fat", 
+                                                       plotlyOutput("Total_so_fatores")))
+                                       )
+                              )
+                       )
+  )
+)
+)
 
 
 # Define server logic required to draw a histogram
@@ -182,6 +193,22 @@ server <- function(input, output) {
    
    output$DPMFi_completo <- renderPlotly({
      plota_completo_por_tipo("DPMFi")
+   })
+   
+   output$Total_completo <- renderPlotly({
+     plota_completo_por_tipo("Total")
+   })
+   
+   output$DPFe_so_fatores <- renderPlotly({
+     plota_so_fatores_por_tipo("DPFe")
+   })
+   
+   output$DPMFi_so_fatores <- renderPlotly({
+     plota_so_fatores_por_tipo("DPMFi")
+   })
+   
+   output$Total_so_fatores <- renderPlotly({
+     plota_so_fatores_por_tipo("Total")
    })
 }
 
