@@ -32,16 +32,19 @@ tema <- function(){
 
 ```
 
+## Geral
+
+```{r}
+radical_nome_arq <- "Anexo_RMD_"
+ano_atu <- 2019
+meses <- c("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
+```
+
+
 ## Dados DPF
 
 ```{r}
-
-radical_nome_arq <- "Anexo_RMD_"
-
 tabela_dpf <- read_excel("../Anexo_RMD_Fev_19.xlsx", sheet = "2.1", skip = 4)
-
-ano_atu <- 2019
-meses <- c("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
 
 dados_dpf <- tabela_dpf %>% 
   rename(rotulos = 1) %>%
@@ -49,10 +52,10 @@ dados_dpf <- tabela_dpf %>%
   select(-1) %>%
   gather(key = Mes_Ano, value = Valor) %>%
   separate(Mes_Ano, into = c("Mes", "Ano"), sep = "/") %>%
-  mutate(Ano = paste0('20', Ano),
-         Mes_num = match(Mes, meses),
+  mutate(Ano = as.numeric(paste0('20', Ano)),
+         Mes = match(Mes, meses),
          Periodo = as.Date(paste0(Ano, "-",
-                                  str_pad(Mes_num, 2), "-",
+                                  str_pad(Mes, 2), "-",
                                   "01")),
          Valor = as.numeric(Valor),
          Agrupador = "Estoque Nominal",
@@ -78,12 +81,107 @@ dados_composicao <- tabela_composicao %>%
          Periodo = as.Date(Periodo),
          Mes = month(Periodo),
          Ano = year(Periodo),
-         Agregador = "Composição") %>%
+         Agrupador = "Composição") %>%
   fill(Indicador) %>%
-  filter(Unidade == "Percentual") %>%
   select(-rotulos) %>%
-  filter(!(Indicador %in% c("Demais", "Total"))) %>%
+  filter(Unidade == "Percentual", 
+         !(Indicador %in% c("Demais", "Total"))) %>%
   filter(Ano >= ano_atu - 1)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+## Dados Vencimentos
+
+```{r}
+tabela_vencimentos <- read_excel("../Anexo_RMD_Fev_19.xlsx", sheet = "3.1", skip = 6)
+
+tipos_vencimentos <- c("Até 12 meses", "De 1 a 2 anos", "De 2 a 3 anos", "De 3 a 4 anos", "De 4 a 5 anos", "Acima de 5 anos", "Total") 
+
+posicao_DPMFi <- which(tabela_vencimentos[1] == "DPMFi")
+
+dados_vencimentos <- tabela_vencimentos %>%
+  filter(row_number() < posicao_DPMFi) %>%
+  rename(Periodo = `Mês`) %>%
+  filter(!is.na(Periodo)) %>%
+  gather(-Periodo, key = rotulos, value = Valor) %>%
+  mutate(Indicador = ifelse(rotulos %in% tipos_vencimentos, rotulos, NA),
+         Unidade  = ifelse(is.na(Indicador), "Percentual", "Saldo"),
+         Periodo = as.Date(as.numeric(Periodo), origin = "1899-12-30"),
+         Mes = month(Periodo),
+         Ano = year(Periodo),
+         Valor = as.numeric(Valor),
+         Agrupador = "Estrutura de Vencimentos") %>%
+  fill(Indicador) %>%
+  select(-rotulos) %>%
+  filter(Unidade == "Percentual", 
+         Indicador == "Até 12 meses") %>%
+  mutate(Indicador = "% Vincendo em 12 meses") %>%
+  filter(Ano >= ano_atu - 1)
+
+```
+
+## Dados Prazo Médio
+
+```{r}
+tabela_prazo_medio <- read_excel("../Anexo_RMD_Fev_19.xlsx", sheet = "3.7", skip = 4)
+
+dados_prazo_medio <- tabela_prazo_medio %>% 
+  rename(rotulos = 1) %>%
+  filter(rotulos == "DPF") %>%
+  select(-1) %>%
+  gather(key = Mes_Ano, value = Valor) %>%
+  separate(Mes_Ano, into = c("Mes", "Ano"), sep = "/") %>%
+  mutate(Ano = as.numeric(paste0('20', Ano)),
+         Mes = match(Mes, meses),
+         Periodo = as.Date(paste0(Ano, "-",
+                                  str_pad(Mes, 2), "-",
+                                  "01")),
+         Valor = as.numeric(Valor),
+         Agrupador = "Estrutura de Vencimentos",
+         Indicador = "Prazo Médio (anos)",
+         Unidade = "Anos") %>%
+  filter(Ano >= ano_atu - 1)
+
+```
+
+## Juntando Todos
+
+```{r}
+dados_grandes_numeros <- bind_rows(
+  dados_dpf,
+  dados_composicao,
+  dados_vencimentos,
+  dados_prazo_medio)
+
+dados_PAF <- read_excel("../dados_PAF.xlsx")
+
+base_GN <- dados_grandes_numeros %>%
+  left_join(dados_PAF) %>%
+  mutate(dentro_fora = ifelse((Valor >= PAFmin) & (Valor <= PAFmax), "Dentro", "Fora"),
+         mes_texto = meses[Mes])
+```
+
+## Plots
+
+```{r}
+escala_meses <- meses
+names(escala_meses) <- 1:12
+
+teste_graf <- ggplot(base_GN, aes(x = reorder(mes_texto, Mes), group = Ano, y = Valor)) +
+  geom_ribbon(aes(ymin = PAFmin, ymax = PAFmax), fill = "LightBlue") +
+  geom_line(aes(y = ifelse(Ano == ano_atu, Valor, NA), color = dentro_fora),
+            size = 1) +
+  geom_line(aes(y = ifelse(Ano == ano_atu-1, Valor, NA)),
+            color = "grey") +
+  geom_text(aes(label = ifelse(Periodo == max(base_GN$Periodo), 
+                               format(round(Valor,2), big.mark = ".", decimal.mark = ","), 
+                               NA),
+                color = dentro_fora,
+                y = Valor * 1.01), family = "Source Sans Pro") +
+  geom_point(aes(color = ifelse(Ano == ano_atu, dentro_fora, NA)), size = 3) +
+  scale_color_manual(values = c("Dentro" = "dodgerblue", "Fora" = "firebrick")) +
+  labs(x = NULL, y = NULL) +
+  coord_cartesian(clip = "on") +
+  scale_y_continuous(position = "right") +
+  tema() + facet_wrap(~Indicador, scales = "free")
+```
+
