@@ -1,0 +1,89 @@
+---
+title: "grandes-numeros"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(viridis)
+library(extrafont)
+library(RColorBrewer)
+
+tema <- function(){
+    theme_minimal() +
+    theme(
+      text = element_text(family = "Source Sans Pro", colour = "grey20"),
+      title = element_text(face = "bold", size = 10, color = "#1E4C7A"), 
+      plot.subtitle = element_text(family = "Source Sans Pro", 
+                                   color = "grey20", face = "plain", size = 10),
+      axis.text = element_text(family = "Source Sans Pro", colour = "grey20", size = 8),
+      plot.caption = element_text(face = "italic"),
+      panel.grid.major = element_blank(), 
+      panel.grid.minor = element_blank(),
+      legend.text = element_text(size = 14),
+      legend.title = element_text(size = 14),
+      axis.ticks = element_line(size = 0.5),
+      axis.ticks.length = unit(.25, "cm"),
+      axis.title = element_text(size = 8, colour = "grey20"),
+      legend.position = 'none')
+}
+
+```
+
+## Dados DPF
+
+```{r}
+
+radical_nome_arq <- "Anexo_RMD_"
+
+tabela_dpf <- read_excel("../Anexo_RMD_Fev_19.xlsx", sheet = "2.1", skip = 4)
+
+ano_atu <- 2019
+meses <- c("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
+
+dados_dpf <- tabela_dpf %>% 
+  rename(rotulos = 1) %>%
+  filter(rotulos == "DPF EM PODER DO PÚBLICO") %>%
+  select(-1) %>%
+  gather(key = Mes_Ano, value = Valor) %>%
+  separate(Mes_Ano, into = c("Mes", "Ano"), sep = "/") %>%
+  mutate(Ano = paste0('20', Ano),
+         Mes_num = match(Mes, meses),
+         Periodo = as.Date(paste0(Ano, "-",
+                                  str_pad(Mes_num, 2), "-",
+                                  "01")),
+         Valor = as.numeric(Valor),
+         Agrupador = "Estoque Nominal",
+         Indicador = "Estoque DPF",
+         Unidade = "R$ bi") %>%
+  filter(Ano >= ano_atu - 1)
+
+```
+
+## Dados Composição
+
+```{r}
+tabela_composicao <- read_excel("../Anexo_RMD_Fev_19.xlsx", sheet = "2.4", skip = 4)
+
+tipos_titulos <- c("Prefixado",	"Índice Preços", "Taxa Flutuante",	"Câmbio",	"Demais",	"Total")
+
+dados_composicao <- tabela_composicao %>%
+  rename(Periodo = `Mês`) %>%
+  filter(!is.na(Periodo)) %>%
+  gather(-Periodo, key = rotulos, value = Valor) %>%
+  mutate(Indicador = ifelse(rotulos %in% tipos_titulos, rotulos, NA),
+         Unidade  = ifelse(is.na(Indicador), "Percentual", "Saldo"),
+         Periodo = as.Date(Periodo),
+         Mes = month(Periodo),
+         Ano = year(Periodo),
+         Agregador = "Composição") %>%
+  fill(Indicador) %>%
+  filter(Unidade == "Percentual") %>%
+  select(-rotulos) %>%
+  filter(!(Indicador %in% c("Demais", "Total"))) %>%
+  filter(Ano >= ano_atu - 1)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
