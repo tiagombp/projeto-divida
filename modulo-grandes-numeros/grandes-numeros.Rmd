@@ -10,6 +10,8 @@ library(tidyverse)
 library(viridis)
 library(extrafont)
 library(RColorBrewer)
+library(readxl)
+library(lubridate)
 
 tema <- function(){
     theme_minimal() +
@@ -24,8 +26,8 @@ tema <- function(){
       panel.grid.minor = element_blank(),
       legend.text = element_text(size = 14),
       legend.title = element_text(size = 14),
-      axis.ticks = element_line(size = 0.5),
-      axis.ticks.length = unit(.25, "cm"),
+      axis.ticks = element_line(size = 0.5, color = "grey30"),
+      axis.ticks.length = unit(.15, "cm"),
       axis.title = element_text(size = 8, colour = "grey20"),
       legend.position = 'none')
 }
@@ -166,6 +168,41 @@ base_GN <- dados_grandes_numeros %>%
 escala_meses <- meses
 names(escala_meses) <- 1:12
 
+gera_graf <- function(indicador) {
+  base <- base_GN %>% filter(Indicador == indicador)
+  
+  graf_basico <- ggplot(base, aes(x = reorder(mes_texto, Mes), group = Ano, y = Valor)) +
+  geom_ribbon(aes(ymin = PAFmin, ymax = PAFmax), fill = "LightBlue") +
+  geom_line(aes(y = ifelse(Ano == ano_atu, Valor, NA), color = dentro_fora),
+            size = 1) +
+  geom_line(aes(y = ifelse(Ano == ano_atu-1, Valor, NA)),
+            color = "grey") +
+  geom_text(aes(label = ifelse(Periodo == max(base_GN$Periodo), 
+                               format(round(Valor,2), big.mark = ".", decimal.mark = ","), 
+                               NA),
+                color = dentro_fora,
+                x = Mes + 0.7), family = "Source Sans Pro", hjust = "left", size = 3) +
+  geom_text(aes(label = ifelse(Mes == 1 & Ano == ano_atu - 1, 
+                               ano_atu-1, 
+                               NA),
+                x = Mes - 0.4), color = "grey", 
+            family = "Source Sans Pro", size = 2.5, hjust = "right") +
+  geom_text(aes(label = ifelse(Mes == 1 & Ano == ano_atu, 
+                               ano_atu, 
+                               NA),
+                x = Mes - 0.4), color = "DarkGrey", 
+            family = "Source Sans Pro", size = 2.5, hjust = "right") +
+  geom_point(aes(color = ifelse(Ano == ano_atu, dentro_fora, NA)), size = 3) +
+  scale_color_manual(values = c("Dentro" = "dodgerblue", "Fora" = "firebrick")) +
+  scale_fill_manual(values = c("Dentro" = "dodgerblue", "Fora" = "firebrick")) +
+  labs(x = NULL, y = NULL) +
+  coord_cartesian(clip = "on") +
+  scale_y_continuous(position = "right") +
+  scale_x_discrete(expand = expand_scale(add = c(1,1.5))) +
+  tema()
+  
+}
+
 teste_graf <- ggplot(base_GN, aes(x = reorder(mes_texto, Mes), group = Ano, y = Valor)) +
   geom_ribbon(aes(ymin = PAFmin, ymax = PAFmax), fill = "LightBlue") +
   geom_line(aes(y = ifelse(Ano == ano_atu, Valor, NA), color = dentro_fora),
@@ -176,12 +213,24 @@ teste_graf <- ggplot(base_GN, aes(x = reorder(mes_texto, Mes), group = Ano, y = 
                                format(round(Valor,2), big.mark = ".", decimal.mark = ","), 
                                NA),
                 color = dentro_fora,
-                y = Valor * 1.01), family = "Source Sans Pro") +
+                x = Mes + 0.7), family = "Source Sans Pro", hjust = "left", size = 3) +
+  geom_text(aes(label = ifelse(Mes == 1 & Ano == ano_atu - 1, 
+                               ano_atu-1, 
+                               NA),
+                x = Mes - 0.4), color = "grey", 
+            family = "Source Sans Pro", size = 2.5, hjust = "right") +
+  geom_text(aes(label = ifelse(Mes == 1 & Ano == ano_atu, 
+                               ano_atu, 
+                               NA),
+                x = Mes - 0.4), color = "DarkGrey", 
+            family = "Source Sans Pro", size = 2.5, hjust = "right") +
   geom_point(aes(color = ifelse(Ano == ano_atu, dentro_fora, NA)), size = 3) +
   scale_color_manual(values = c("Dentro" = "dodgerblue", "Fora" = "firebrick")) +
+  scale_fill_manual(values = c("Dentro" = "dodgerblue", "Fora" = "firebrick")) +
   labs(x = NULL, y = NULL) +
   coord_cartesian(clip = "on") +
   scale_y_continuous(position = "right") +
+  scale_x_discrete(expand = expand_scale(add = c(1,1.5))) +
   tema() + facet_wrap(~Indicador, scales = "free")
 ```
 
