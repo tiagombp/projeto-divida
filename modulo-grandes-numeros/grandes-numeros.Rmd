@@ -178,16 +178,12 @@ gera_graf <- function(indicador) {
             size = 1) +
     geom_line(aes(y = ifelse(Ano == ano_atu-1, Valor, NA)),
             color = "grey") +
-    geom_text(aes(label = ifelse(Mes == 1 & Ano == ano_atu - 1, 
-                               ano_atu-1, 
+    geom_text(aes(label = ifelse(Mes == 1, 
+                               Ano, 
                                NA),
-                  x = Mes - 0.4), color = "grey", 
-              family = "Source Sans Pro", size = 3, hjust = "right") +
-    geom_text(aes(label = ifelse(Mes == 1 & Ano == ano_atu, 
-                                 ano_atu, 
-                                 NA),
-                  x = Mes - 0.4), color = "DarkGrey", 
-              family = "Source Sans Pro", size = 3, hjust = "right") +
+                  x = Mes - 0.3), color = "darkgrey", 
+              family = "Source Sans Pro", size = 3.5, hjust = "right", fontface = "italic",
+              check_overlap = TRUE) +
     geom_point(aes(color = ifelse(Ano == ano_atu, dentro_fora, NA)), size = 3) +
     scale_color_manual(values = c("Dentro" = "dodgerblue", "Fora" = "firebrick")) +
     scale_fill_manual(values = c("Dentro" = "dodgerblue", "Fora" = "firebrick")) +
@@ -203,7 +199,7 @@ gera_graf <- function(indicador) {
                                format(round(Valor,0), big.mark = ".", decimal.mark = ","), 
                                NA),
                 color = dentro_fora,
-                x = Mes + 0.3), family = "Source Sans Pro", hjust = "left", size = 3.5) +
+                x = Mes + 0.2), family = "Source Sans Pro", hjust = "left", size = 4.5) +
       scale_y_continuous(position = "right", labels = function(x) {format(x, big.mark = ".", decimal.mark=",", scientific = FALSE)})
   } else if (unidade == "Percentual") {
     graf_final <- graf_basico +
