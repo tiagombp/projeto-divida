@@ -12,6 +12,7 @@ library(extrafont)
 library(RColorBrewer)
 library(readxl)
 library(lubridate)
+library(scales)
 
 tema <- function(){
     theme_minimal() +
@@ -20,7 +21,7 @@ tema <- function(){
       title = element_text(face = "bold", size = 10, color = "#1E4C7A"), 
       plot.subtitle = element_text(family = "Source Sans Pro", 
                                    color = "grey20", face = "plain", size = 10),
-      axis.text = element_text(family = "Source Sans Pro", colour = "grey20", size = 8),
+      axis.text = element_text(family = "Source Sans Pro", colour = "grey20", size = 10),
       plot.caption = element_text(face = "italic"),
       panel.grid.major = element_blank(), 
       panel.grid.minor = element_blank(),
@@ -172,36 +173,64 @@ gera_graf <- function(indicador) {
   base <- base_GN %>% filter(Indicador == indicador)
   
   graf_basico <- ggplot(base, aes(x = reorder(mes_texto, Mes), group = Ano, y = Valor)) +
-  geom_ribbon(aes(ymin = PAFmin, ymax = PAFmax), fill = "LightBlue") +
-  geom_line(aes(y = ifelse(Ano == ano_atu, Valor, NA), color = dentro_fora),
+    geom_ribbon(aes(ymin = PAFmin, ymax = PAFmax), fill = "LightBlue") +
+    geom_line(aes(y = ifelse(Ano == ano_atu, Valor, NA), color = dentro_fora),
             size = 1) +
-  geom_line(aes(y = ifelse(Ano == ano_atu-1, Valor, NA)),
+    geom_line(aes(y = ifelse(Ano == ano_atu-1, Valor, NA)),
             color = "grey") +
-  geom_text(aes(label = ifelse(Periodo == max(base_GN$Periodo), 
+    geom_text(aes(label = ifelse(Mes == 1 & Ano == ano_atu - 1, 
+                               ano_atu-1, 
+                               NA),
+                  x = Mes - 0.4), color = "grey", 
+              family = "Source Sans Pro", size = 3, hjust = "right") +
+    geom_text(aes(label = ifelse(Mes == 1 & Ano == ano_atu, 
+                                 ano_atu, 
+                                 NA),
+                  x = Mes - 0.4), color = "DarkGrey", 
+              family = "Source Sans Pro", size = 3, hjust = "right") +
+    geom_point(aes(color = ifelse(Ano == ano_atu, dentro_fora, NA)), size = 3) +
+    scale_color_manual(values = c("Dentro" = "dodgerblue", "Fora" = "firebrick")) +
+    scale_fill_manual(values = c("Dentro" = "dodgerblue", "Fora" = "firebrick")) +
+    labs(x = NULL, y = NULL) +
+    scale_x_discrete(expand = expand_scale(add = c(1,1))) +
+    tema()
+  
+  unidade <- base$Unidade[1]
+  
+  if (unidade == "R$ bi") {
+    graf_final <- graf_basico +
+      geom_text(aes(label = ifelse(Periodo == max(base_GN$Periodo), 
+                               format(round(Valor,0), big.mark = ".", decimal.mark = ","), 
+                               NA),
+                color = dentro_fora,
+                x = Mes + 0.3), family = "Source Sans Pro", hjust = "left", size = 3.5) +
+      scale_y_continuous(position = "right", labels = function(x) {format(x, big.mark = ".", decimal.mark=",", scientific = FALSE)})
+  } else if (unidade == "Percentual") {
+    graf_final <- graf_basico +
+      geom_text(aes(label = ifelse(Periodo == max(base_GN$Periodo), 
+                               percent(round(Valor,0)), 
+                               NA),
+                color = dentro_fora,
+                x = Mes + 0.5), family = "Source Sans Pro", hjust = "left", size = 3.5) +
+      scale_y_continuous(position = "right", labels = percent)
+  } else if (unidade == "Anos") {
+    graf_final <- graf_basico +
+      geom_text(aes(label = ifelse(Periodo == max(base_GN$Periodo), 
                                format(round(Valor,2), big.mark = ".", decimal.mark = ","), 
                                NA),
                 color = dentro_fora,
-                x = Mes + 0.7), family = "Source Sans Pro", hjust = "left", size = 3) +
-  geom_text(aes(label = ifelse(Mes == 1 & Ano == ano_atu - 1, 
-                               ano_atu-1, 
-                               NA),
-                x = Mes - 0.4), color = "grey", 
-            family = "Source Sans Pro", size = 2.5, hjust = "right") +
-  geom_text(aes(label = ifelse(Mes == 1 & Ano == ano_atu, 
-                               ano_atu, 
-                               NA),
-                x = Mes - 0.4), color = "DarkGrey", 
-            family = "Source Sans Pro", size = 2.5, hjust = "right") +
-  geom_point(aes(color = ifelse(Ano == ano_atu, dentro_fora, NA)), size = 3) +
-  scale_color_manual(values = c("Dentro" = "dodgerblue", "Fora" = "firebrick")) +
-  scale_fill_manual(values = c("Dentro" = "dodgerblue", "Fora" = "firebrick")) +
-  labs(x = NULL, y = NULL) +
-  coord_cartesian(clip = "on") +
-  scale_y_continuous(position = "right") +
-  scale_x_discrete(expand = expand_scale(add = c(1,1.5))) +
-  tema()
+                x = Mes + 0.5), family = "Source Sans Pro", hjust = "left", size = 3.5) +
+      scale_y_continuous(position = "right")    
+  }
+  
+  return(graf_final)
   
 }
+
+gera_graf("Estoque DPF")
+
+
+
 
 teste_graf <- ggplot(base_GN, aes(x = reorder(mes_texto, Mes), group = Ano, y = Valor)) +
   geom_ribbon(aes(ymin = PAFmin, ymax = PAFmax), fill = "LightBlue") +
@@ -233,35 +262,5 @@ teste_graf <- ggplot(base_GN, aes(x = reorder(mes_texto, Mes), group = Ano, y = 
   scale_x_discrete(expand = expand_scale(add = c(1,1.5))) +
   tema() + facet_wrap(~Indicador, scales = "free")
 
-#com annotate em vez de geom_ribbon
-teste_graf1 <- ggplot(base_GN %>% filter(Indicador == "Estoque DPF"), aes(x = reorder(mes_texto, Mes), group = Ano, y = Valor)) +
-  annotate(geom = "rect", ymin = (base_GN %>% filter(Indicador == "Estoque DPF"))$PAFmin[1], ymax = (base_GN %>% filter(Indicador == "Estoque DPF"))$PAFmax[1], xmin = -Inf, xmax = +Inf, fill = "LightBlue", alpha = 0.5) +
-  geom_line(aes(y = ifelse(Ano == ano_atu, Valor, NA), color = dentro_fora),
-            size = 1) +
-  geom_line(aes(y = ifelse(Ano == ano_atu-1, Valor, NA)),
-            color = "grey") +
-  geom_text(aes(label = ifelse(Periodo == max(base_GN$Periodo), 
-                               format(round(Valor,2), big.mark = ".", decimal.mark = ","), 
-                               NA),
-                color = dentro_fora,
-                x = Mes + 0.7), family = "Source Sans Pro", hjust = "left", size = 3) +
-  geom_text(aes(label = ifelse(Mes == 1 & Ano == ano_atu - 1, 
-                               ano_atu-1, 
-                               NA),
-                x = Mes - 0.4), color = "grey", 
-            family = "Source Sans Pro", size = 2.5, hjust = "right") +
-  geom_text(aes(label = ifelse(Mes == 1 & Ano == ano_atu, 
-                               ano_atu, 
-                               NA),
-                x = Mes - 0.4), color = "DarkGrey", 
-            family = "Source Sans Pro", size = 2.5, hjust = "right") +
-  geom_point(aes(color = ifelse(Ano == ano_atu, dentro_fora, NA)), size = 3) +
-  scale_color_manual(values = c("Dentro" = "dodgerblue", "Fora" = "firebrick")) +
-  scale_fill_manual(values = c("Dentro" = "dodgerblue", "Fora" = "firebrick")) +
-  labs(x = NULL, y = NULL) +
-  coord_cartesian(clip = "on") +
-  scale_y_continuous(position = "right") +
-  scale_x_discrete(expand = expand_scale(add = c(1,1.5))) +
-  tema()
 ```
 
