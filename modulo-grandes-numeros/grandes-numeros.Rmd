@@ -193,8 +193,8 @@ gera_graf <- function(indicador) {
               family = "Source Sans Pro", size = 3.5, hjust = "right", fontface = "italic",
               check_overlap = TRUE) +
     geom_point(aes(color = ifelse(Ano == ano_atu, dentro_fora, NA)), size = 3) +
-    scale_color_manual(values = c("Dentro" = "dodgerblue", "Fora" = "firebrick")) +
-    scale_fill_manual(values = c("Dentro" = "dodgerblue", "Fora" = "firebrick")) +
+    scale_color_manual(values = c("Dentro" = "steelblue", "Fora" = "firebrick")) +
+    scale_fill_manual(values = c("Dentro" = "steelblue", "Fora" = "firebrick")) +
     labs(x = NULL, y = NULL) +
     scale_x_discrete(expand = expand_scale(add = c(1.2,1.2))) +
     tema()
