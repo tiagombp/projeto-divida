@@ -238,7 +238,7 @@ indicadores <- unique(base_GN$Indicador)
 lista_graficos <- purrr::map(indicadores, gera_graf)
 names(lista_graficos) <- indicadores
 
-save(lista_graficos, file = "GN.RData")
+save(lista_graficos, ano_atu, base_GN, file = "GN.RData")
 
 # gera_graf("Estoque DPF")
 
