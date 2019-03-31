@@ -15,10 +15,10 @@ server = function(input, output, session) {
   load("GN.RData")
   output$EstoqueDPF <- lista_graficos[["Estoque DPF"]]
   output$Prefixado  <- lista_graficos[["Prefixado"]]
-  output$IndicePrecos <- lista_graficos[["?ndice Pre?os"]]
+  output$IndicePrecos <- lista_graficos[["Índice Preços"]]
   output$Flutuante <- lista_graficos[["Taxa Flutuante"]]
-  output$Cambio <- lista_graficos[["C?mbio"]]
+  output$Cambio <- lista_graficos[["Câmbio"]]
   output$PercentVincendo <- lista_graficos[["% Vincendo em 12 meses"]]
-  output$PrazoMedio <- lista_graficos[["Prazo M?dio (anos)"]]
+  output$PrazoMedio <- lista_graficos[["Prazo Médio (anos)"]]
 }
 

@@ -2,7 +2,7 @@ library(shiny)
 library(shinydashboard)
 library(flexdashboard)
 
-header <- dashboardHeader(title = "D?vida P?blica Federal", titleWidth = 270, tags$li(class="dropdown", tags$a(href="https://github.com/gt-cead", icon("github"), "Source Code", target ="_blank")))
+header <- dashboardHeader(title = "Dívida Pública Federal", titleWidth = 270, tags$li(class="dropdown", tags$a(href="https://github.com/gt-cead", icon("github"), "Source Code", target ="_blank")))
 
 sidebar <- dashboardSidebar(width =270,
                             
@@ -13,8 +13,8 @@ sidebar <- dashboardSidebar(width =270,
                               id = "tabs",
                               
                               menuItem("DPF em Mercado", tabName = "estoque" ,icon = icon("bar-chart-o"),
-                                       menuSubItem("Evolu??o", tabName = "evolucao"),
-                                       menuSubItem("Fatores de Varia??o", tabName = "fatores"),
+                                       menuSubItem("Evolução", tabName = "evolucao"),
+                                       menuSubItem("Fatores de Variação", tabName = "fatores"),
                                        menuSubItem("Indexadores", tabName = "composicao"),
                                        menuSubItem("Detentores", tabName = "detentores")))
 )
@@ -26,17 +26,17 @@ body <- dashboardBody(
             fluidRow(
               box(plotOutput("EstoqueDPF"), title ="Estoque DPF - Bilh?es R$", solidHeader = T ,width = 4)
             ),
-            strong("Composi??o"),
+            strong("Composição"),
             fluidRow(
               box(plotOutput("Prefixado"), title ="Indexador Prefixado", solidHeader = T , width = 4),
-              box(plotOutput("IndicePrecos"), title ="?ndice de Pre?os", solidHeader = T , width = 4),
+              box(plotOutput("IndicePrecos"), title ="Índice de Preços", solidHeader = T , width = 4),
               box(plotOutput("Flutuante"), title ="Indexador Flutuante", solidHeader = T , width = 4),
-              box(plotOutput("Cambio"), title ="C?mbio", solidHeader = T , width = 4)
+              box(plotOutput("Cambio"), title ="Câmbio", solidHeader = T , width = 4)
             ),
             strong("Estrutura de Vencimentos"),
             fluidRow(
               box(plotOutput("PercentVincendo"), title ="% Vincendo em 12 meses", solidHeader = T , width = 4),
-              box(plotOutput("PrazoMedio"), title ="Prazo M?dio", solidHeader = T , width = 4)
+              box(plotOutput("PrazoMedio"), title ="Prazo Médio", solidHeader = T , width = 4)
             )
     ))
 )
