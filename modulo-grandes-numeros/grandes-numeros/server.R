@@ -13,12 +13,12 @@ library(flexdashboard)
 server = function(input, output, session) { 
   
   load("GN.RData")
-  output$EstoqueDPF <- lista_graficos[["Estoque DPF"]]
-  output$Prefixado  <- lista_graficos[["Prefixado"]]
-  output$IndicePrecos <- lista_graficos[["Índice Preços"]]
-  output$Flutuante <- lista_graficos[["Taxa Flutuante"]]
-  output$Cambio <- lista_graficos[["Câmbio"]]
-  output$PercentVincendo <- lista_graficos[["% Vincendo em 12 meses"]]
-  output$PrazoMedio <- lista_graficos[["Prazo Médio (anos)"]]
+  output$EstoqueDPF      <- renderPlot(lista_graficos[["Estoque DPF"]])
+  output$Prefixado       <- renderPlot(lista_graficos[["Prefixado"]])
+  output$IndicePrecos    <- renderPlot(lista_graficos[["Índice Preços"]])
+  output$Flutuante       <- renderPlot(lista_graficos[["Taxa Flutuante"]])
+  output$Cambio          <- renderPlot(lista_graficos[["Câmbio"]])
+  output$PercentVincendo <- renderPlot(lista_graficos[["% Vincendo em 12 meses"]])
+  output$PrazoMedio      <- renderPlot(lista_graficos[["Prazo Médio (anos)"]])
 }
 
