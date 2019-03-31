@@ -20,19 +20,19 @@ body <- dashboardBody(
     tabItem(tabName = "GrandesNumeros",
             strong("Estoque Nominal"),
             fluidRow(
-              box(plotOutput("EstoqueDPF"), title ="Estoque DPF - Bilhões R$", solidHeader = T ,width = 6)
+              box(plotOutput("EstoqueDPF"), title ="Estoque DPF - Bilhões R$", solidHeader = T ,width = 6, height = 350)
             ),
             strong("Composição"),
             fluidRow(
-              box(plotOutput("Prefixado"), title ="Indexador Prefixado", solidHeader = T , width = 6),
-              box(plotOutput("IndicePrecos"), title ="Índice de Preços", solidHeader = T , width = 6),
-              box(plotOutput("Flutuante"), title ="Indexador Flutuante", solidHeader = T , width = 6),
-              box(plotOutput("Cambio"), title ="Câmbio", solidHeader = T , width = 6)
+              box(plotOutput("Prefixado"), title ="Indexador Prefixado", solidHeader = T , width = 6, height = 350),
+              box(plotOutput("IndicePrecos"), title ="Índice de Preços", solidHeader = T , width = 6, height = 350),
+              box(plotOutput("Flutuante"), title ="Indexador Flutuante", solidHeader = T , width = 6, height = 350),
+              box(plotOutput("Cambio"), title ="Câmbio", solidHeader = T , width = 6, height = 350)
             ),
             strong("Estrutura de Vencimentos"),
             fluidRow(
-              box(plotOutput("PercentVincendo"), title ="% Vincendo em 12 meses", solidHeader = T , width = 6),
-              box(plotOutput("PrazoMedio"), title ="Prazo Médio", solidHeader = T , width = 6)
+              box(plotOutput("PercentVincendo"), title ="% Vincendo em 12 meses", solidHeader = T , width = 6, height = 350),
+              box(plotOutput("PrazoMedio"), title ="Prazo Médio", solidHeader = T , width = 6, height = 350)
             )
     ))
 )
