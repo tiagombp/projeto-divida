@@ -160,22 +160,9 @@ server = function(input, output, session) {
       )
   }
   
-  ano_selecionado <- reactive(
-    as.character(input$ano)
-  )
-  
-  criterios_selecionados <- reactive(
-    input$criterios
-  )
-  
-  carteira_selecionada <- reactive(
-    input$carteira
-  )
-  
-  output$texto <- renderText({print(ano_selecionado())})
-  # output$exec-orcam <- renderPlotly({
-  #   plota_sankey(ano_selecionado(), criterios_selecionados(), carteira_selecionada())
-  #})
+  output$sankey <- renderPlotly({
+     plota_sankey(as.character(input$ano), input$criterios, input$carteira)
+  })
 }
     
 

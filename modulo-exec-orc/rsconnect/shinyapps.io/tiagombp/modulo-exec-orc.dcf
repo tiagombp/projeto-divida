@@ -1,0 +1,13 @@
+name: modulo-exec-orc
+title: modulo-exec-orc
+username:
+account: tiagombp
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 838347
+bundleId: 1986379
+url: https://tiagombp.shinyapps.io/modulo-exec-orc/
+when: 1554381109.1496
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: analise.R

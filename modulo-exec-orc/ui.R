@@ -30,12 +30,13 @@ sidebar <- dashboardSidebar(width =270,
 body <- dashboardBody(
   
   tabItem(tabName = "exec_orcam",
-          tabBox(id="graf_fatores", width = 1000, height=600,
-                 tabPanel("Fatores de Variação e Estoque", 
+          tabBox(id="graf_exec_orc", width = 1000, height=800,
+                 tabPanel("Execução Orçamentária da Dívida",
+                          inputPanel(
                           sliderInput("ano", "Escolha o exercício", 2009, min = min(intervalo_anos) , max = max(intervalo_anos), sep = ""),
-                          radioButtons("criterios", "Escolha a variável", choices = c("Mod", "Carteira", "Mov"), selected = "Mov"),
-                          checkboxInput("carteira", "Apenas Mercado?", value = FALSE),
-                          plotlyOutput("exec-orcam"))
+                          radioButtons("criterios", "Escolha a variável", choiceNames = c("Tipo de Dívida", "Tipo de Carteira", "Tipo de Movimentação Financeira (Juros / Principal)"), choiceValues = c("Mod", "Carteira", "Mov"), selected = "Mov"),
+                          checkboxInput("carteira", "Apenas Mercado?", value = FALSE)),
+                          plotlyOutput("sankey"))
                  )
           )
   )
