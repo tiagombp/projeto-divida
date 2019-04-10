@@ -144,7 +144,7 @@ server = function(input, output, session) {
                                 
                                 list(step = "all"))),
                             
-                            rangeslider = list(type = "date"),
+                            #rangeslider = list(type = "date"),
                             range = c(data_min, data_max)),
                
                yaxis = list(title = "R$ - Milhões", zeroline = TRUE,
