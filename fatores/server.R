@@ -9,7 +9,7 @@ library(RColorBrewer)
 server = function(input, output, session) { 
 
     load("fatores.RData")
-    desloc <- 15
+    desloc <- 10
     formata <- function(x){
       paste0("R$", format(round(x, 2), big.mark = ".", decimal.mark = ","), " mi")
     }
@@ -24,26 +24,31 @@ server = function(input, output, session) {
                       text = ~paste(nomes, "<br />",
                                     mes, "/", ano, "<br />",
                                     formata(valor)), hoverinfo = "text") %>%
-        add_segments(data = sub_bases[["Juros"]], 
-                     x = ~Periodo, xend = ~Periodo, y = ~y, yend = ~yend) %>%
-        add_segments(data = sub_bases[["Emissoes"]], 
-                     x = ~Periodo, xend = ~Periodo, y = ~y, yend = ~yend) %>%
-        add_segments(data = sub_bases[["Resgates"]], 
-                     x = ~Periodo+desloc, xend = ~Periodo+desloc, y = ~y, yend = ~yend) %>%
-        add_segments(data = sub_bases[["transf_positiva"]],
-                     x = ~Periodo, xend = ~Periodo, y = ~y, yend = ~yend) %>%
-        add_segments(data = sub_bases[["transf_negativa"]], 
-                     x = ~Periodo, xend = ~Periodo, y = ~y, yend = ~yend) %>%
-        add_segments(data = sub_bases[["Emissoes"]], 
+        add_segments(data = sub_bases[["Emissoes"]], # conector
                      x = ~Periodo, xend = ~Periodo+desloc, y = ~yend, yend = ~yend,
-                     line = list(dash = "dot", width = 0.), 
-                     name = "conectores", showlegend = TRUE, text = NULL) %>%
-        add_segments(data = sub_bases[["Resgates"]], 
-                     x = ~Periodo+desloc, xend = ~prox_periodo, 
-                     y = ~yend, yend = ~yend, line = list(dash = "dot", width = 0.), 
-                     name = "conectores", showlegend = TRUE, text = NULL) %>%
+                     line = list(dash = "dot", width = 0.5, color = "lightgrey"), 
+                     name = "", showlegend = FALSE, text = NULL) %>%
+        add_segments(data = sub_bases[["Resgates"]], # conector
+                     x = ~Periodo+desloc, xend = ~prox_periodo, y = ~yend, yend = ~yend, 
+                     line = list(dash = "dot", width = 0.5, color = "lightgrey"), 
+                     name = "", showlegend = FALSE, text = NULL) %>%
+        add_segments(data = sub_bases[["transf_positiva"]],
+                     x = ~Periodo, xend = ~Periodo, y = ~y, yend = ~yend,
+                     visible = "legendonly") %>%
+        add_segments(data = sub_bases[["transf_negativa"]], 
+                     x = ~Periodo, xend = ~Periodo, y = ~y, yend = ~yend,
+                     visible = "legendonly") %>%
         add_markers(data = sub_bases[["Estoque_ant"]], 
                     x = ~Periodo, y= ~valor) %>%
+        add_segments(data = sub_bases[["Juros"]], 
+                     x = ~Periodo, xend = ~Periodo, y = ~y, yend = ~yend, 
+                     line = list(color = "#377EB8")) %>%
+        add_segments(data = sub_bases[["Emissoes"]], 
+                     x = ~Periodo, xend = ~Periodo, y = ~y, yend = ~yend,
+                     line = list(color = "#FF7F00")) %>%
+        add_segments(data = sub_bases[["Resgates"]], 
+                     x = ~Periodo+desloc, xend = ~Periodo+desloc, y = ~y, yend = ~yend,
+                     line = list(color = "#4DAF4A")) %>%
         layout(annotations = 
                  list(x = 1, y = -0.1, text = "<b>Fonte:</b> Anexo 2.9 - RMD.", 
                       showarrow = F, xref='paper', yref='paper', 
@@ -79,7 +84,7 @@ server = function(input, output, session) {
                                   step = "year",
                                   stepmode = "backward"),
                                 
-                                list(step = "todos"))),
+                                list(step = "all", label = "todos"))),
                             
                             #rangeslider = list(type = "date"),
                             range = c(data_min, data_max)),
@@ -142,7 +147,7 @@ server = function(input, output, session) {
                                   step = "year",
                                   stepmode = "backward"),
                                 
-                                list(step = "all"))),
+                                list(step = "all", label = "todos"))),
                             
                             #rangeslider = list(type = "date"),
                             range = c(data_min, data_max)),
