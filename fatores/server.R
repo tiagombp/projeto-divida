@@ -17,6 +17,8 @@ server = function(input, output, session) {
     plota_completo_por_tipo <- function(tipo_divida) {
       
       sub_bases <- lista_subs[[tipo_divida]]
+      data_min <- min(sub_bases[["Emissoes"]]$Periodo)
+      data_max <- max(sub_bases[["Emissoes"]]$Periodo)
       
       graf <- plot_ly(name = ~nomes, 
                       text = ~paste(nomes, "<br />",
@@ -34,10 +36,12 @@ server = function(input, output, session) {
                      x = ~Periodo, xend = ~Periodo, y = ~y, yend = ~yend) %>%
         add_segments(data = sub_bases[["Emissoes"]], 
                      x = ~Periodo, xend = ~Periodo+desloc, y = ~yend, yend = ~yend,
-                     line = list(dash = "dot", width = 1), name = "", showlegend = FALSE) %>%
+                     line = list(dash = "dot", width = 0.), 
+                     name = "conectores", showlegend = TRUE, text = NULL) %>%
         add_segments(data = sub_bases[["Resgates"]], 
                      x = ~Periodo+desloc, xend = ~prox_periodo, 
-                     y = ~yend, yend = ~yend, line = list(dash = "dot", width = 1), name = "", showlegend = FALSE) %>%
+                     y = ~yend, yend = ~yend, line = list(dash = "dot", width = 0.), 
+                     name = "conectores", showlegend = TRUE, text = NULL) %>%
         add_markers(data = sub_bases[["Estoque_ant"]], 
                     x = ~Periodo, y= ~valor) %>%
         layout(annotations = 
@@ -75,9 +79,10 @@ server = function(input, output, session) {
                                   step = "year",
                                   stepmode = "backward"),
                                 
-                                list(step = "all"))),
+                                list(step = "todos"))),
                             
-                            rangeslider = list(type = "date")),
+                            #rangeslider = list(type = "date"),
+                            range = c(data_min, data_max)),
                
                yaxis = list(title = "R$ - Milhões", zeroline = TRUE,
                             showline = FALSE, showgrid = FALSE, hoverformat = ',.4r')) %>%
@@ -88,6 +93,8 @@ server = function(input, output, session) {
     
     plota_so_fatores_por_tipo <- function(tipo_divida) {
       sub_bases <- lista_dados_sem_estoque[[tipo_divida]]
+      data_min <- min(sub_bases$Periodo)
+      data_max <- max(sub_bases$Periodo)
       graf <- plot_ly(data = sub_bases, x = ~Periodo) %>%
         add_bars(y = ~Juros, name = "Juros", text = ~paste("Juros <br />", 
                                                            mes, "/", ano, "<br />",
@@ -137,7 +144,8 @@ server = function(input, output, session) {
                                 
                                 list(step = "all"))),
                             
-                            rangeslider = list(type = "date")),
+                            rangeslider = list(type = "date"),
+                            range = c(data_min, data_max)),
                
                yaxis = list(title = "R$ - Milhões", zeroline = TRUE,
                             showline = FALSE, showgrid = FALSE, hoverformat = ',.4r')) %>%

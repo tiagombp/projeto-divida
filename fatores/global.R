@@ -221,3 +221,22 @@ names(lista_dados_sem_estoque) <- tipos_divida
 # salva os objetos para serem usados no aplicativo Shiny ------------------
 
 save(lista_subs, lista_dados_sem_estoque,  file = "fatores.RData")
+
+
+# ### Testinho das datas máximas
+# 
+# datas_maximas <- function(tipo_divida, tipo_fator) {
+#   return(max(lista_subs[[tipo_divida]][[tipo_fator]]$Periodo))
+# }
+# 
+# datas_maximas("DPFe", "Estoque_ant")
+# datas_maximas("DPFe", lista_fatores[1])
+# 
+# for (j in 1:length(tipos_divida)) {
+#   for (i in 1:length(fatores_ordenados)) {
+#     print(paste(tipos_divida[j], 
+#                 fatores_ordenados[i], 
+#                 datas_maximas(tipos_divida[j], fatores_ordenados[i])))
+#   }
+# }
+
