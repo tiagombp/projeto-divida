@@ -58,33 +58,7 @@ server = function(input, output, session) {
                xaxis = list(title = "",
                             rangeselector = list(
                               buttons = list(
-                                list(
-                                  count = 3,
-                                  label = "3 meses",
-                                  step = "month",
-                                  stepmode = "backward"),
-                                list(
-                                  count = 6,
-                                  label = "6 meses",
-                                  step = "month",
-                                  stepmode = "backward"),
-                                list(
-                                  count = 1,
-                                  label = "1 ano",
-                                  step = "year",
-                                  stepmode = "backward"),
-                                list(
-                                  count = 3,
-                                  label = "3 anos",
-                                  step = "year",
-                                  stepmode = "backward"),
-                                list(
-                                  count = 5,
-                                  label = "5 anos",
-                                  step = "year",
-                                  stepmode = "backward"),
-                                
-                                list(step = "all", label = "todos"))),
+                                list(step = "all", label = "série completa"))),
                             
                             #rangeslider = list(type = "date"),
                             range = c(data_min, data_max)),
