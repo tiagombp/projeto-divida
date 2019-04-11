@@ -14,7 +14,9 @@ library(scales)
 server = function(input, output, session) { 
   
   load("GN.RData")
-  output$EstoqueDPF      <- renderPlot(lista_graficos[["Estoque DPF"]], height = 250)
+  
+  
+  output$EstoqueDPF      <- renderPlot(lista_graficos[["Estoque DPF"]], height = 180)
   output$Prefixado       <- renderPlot(lista_graficos[["Prefixado"]], height = 250)
   output$IndicePrecos    <- renderPlot(lista_graficos[["Índice Preços"]], height = 250)
   output$Flutuante       <- renderPlot(lista_graficos[["Taxa Flutuante"]], height = 250)
