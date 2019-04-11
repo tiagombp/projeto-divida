@@ -4,6 +4,7 @@ library(flexdashboard)
 
 load("GN.RData")
 
+
 header <- dashboardHeader(title = "Dívida Pública Federal", titleWidth = 270, tags$li(class="dropdown", tags$a(href="https://github.com/gt-cead", icon("github"), "Source Code", target ="_blank")))
 
 sidebar <- dashboardSidebar(width =270,
@@ -20,14 +21,15 @@ sidebar <- dashboardSidebar(width =270,
 body <- dashboardBody(
   tabItems(
     tabItem(tabName = "GrandesNumeros",
-            strong("Estoque Nominal"),
+            
             fluidRow(
-              box(plotOutput("EstoqueDPF"), title ="Estoque DPF - Bilhões R$", solidHeader = T ,width = 6, height = 350)
+              box(plotOutput("EstoqueDPF"), title = paste("Estoque DPF:",lista_valores["Estoque DPF"]),
+                  solidHeader = T ,width = 4, height = 250, background = "blue", collapsible = T)
             ),
             strong("Composição"),
             fluidRow(
-              box(plotOutput("Prefixado"), title ="Indexador Prefixado", solidHeader = T , width = 6, height = 350),
-              box(plotOutput("IndicePrecos"), title ="Índice de Preços", solidHeader = T , width = 6, height = 350),
+              box(plotOutput("Prefixado"), title ="Indexador Prefixado", solidHeader = T , width = 3, height = 350),
+              box(plotOutput("IndicePrecos"), title ="Índice de Preços", solidHeader = T , width = 5, height = 350),
               box(plotOutput("Flutuante"), title ="Indexador Flutuante", solidHeader = T , width = 6, height = 350),
               box(plotOutput("Cambio"), title ="Câmbio", solidHeader = T , width = 6, height = 350)
             ),
