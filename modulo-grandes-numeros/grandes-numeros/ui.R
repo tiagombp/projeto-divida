@@ -2,6 +2,8 @@ library(shiny)
 library(shinydashboard)
 library(flexdashboard)
 
+load("GN.RData")
+
 header <- dashboardHeader(title = "Dívida Pública Federal", titleWidth = 270, tags$li(class="dropdown", tags$a(href="https://github.com/gt-cead", icon("github"), "Source Code", target ="_blank")))
 
 sidebar <- dashboardSidebar(width =270,
