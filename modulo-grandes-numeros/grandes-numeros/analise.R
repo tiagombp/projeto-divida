@@ -238,8 +238,7 @@ names(lista_valores) <- indicadores
 lista_unidades <- purrr::map(indicadores, obtem_unidade)
 names(lista_unidades) <- indicadores
 
-
-save(lista_graficos, lista_valores, ano_atu, base_GN, ultima_data, file = "GN.RData")
+save(lista_graficos, lista_valores, lista_unidades, ano_atu, base_GN, ultima_data, file = "GN.RData")
 
 #gera_graf("Prefixado")
 #obtem_ultimo_valor("Prefixado")
