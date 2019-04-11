@@ -157,19 +157,19 @@ gera_graf <- function(indicador) {
               size = 1) +
     geom_line(aes(y = ifelse(Ano == ano_atu-1, Valor, NA)),
               color = "grey") +
-    geom_text(aes(label = ifelse(Mes == 1, 
-                                 Ano, 
-                                 NA),
-                  x = Mes - 0.3), color = "darkgrey", 
-              family = "Source Sans Pro", size = 3.5, hjust = "right", fontface = "italic",
-              check_overlap = TRUE) +
-    geom_text(aes(label = ifelse(Mes == 1, 
-                                 paste("Intervalo\nPAF", ano_atu), 
-                                 NA),
-                  y = PAFmin + (PAFmax - PAFmin)/2,
-                  x = Mes - 0.1), color = "SteelBlue", 
-              family = "Source Sans Pro", size = 3.5, hjust = "right", fontface = "italic",
-              check_overlap = TRUE) +
+    # geom_text(aes(label = ifelse(Mes == 1, 
+    #                              Ano, 
+    #                              NA),
+    #               x = Mes - 0.3), color = "darkgrey", 
+    #           family = "Source Sans Pro", size = 3.5, hjust = "right", fontface = "italic",
+    #           check_overlap = TRUE) +
+    # geom_text(aes(label = ifelse(Mes == 1, 
+    #                              paste("Intervalo\nPAF", ano_atu), 
+    #                              NA),
+    #               y = PAFmin + (PAFmax - PAFmin)/2,
+    #               x = Mes - 0.1), color = "SteelBlue", 
+    #           family = "Source Sans Pro", size = 3.5, hjust = "right", fontface = "italic",
+    #           check_overlap = TRUE) +
     geom_point(aes(color = ifelse(Ano == ano_atu, dentro_fora, NA)), size = 3) +
     scale_color_manual(values = c("Dentro" = "steelblue", "Fora" = "firebrick")) +
     scale_fill_manual(values = c("Dentro" = "steelblue", "Fora" = "firebrick")) +
