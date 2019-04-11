@@ -9,6 +9,7 @@
 library(shiny)
 library(shinydashboard)
 library(flexdashboard)
+library(scales)
 
 server = function(input, output, session) { 
   
