@@ -181,11 +181,11 @@ gera_graf <- function(indicador) {
   
   if (unidade == "R$ bi") {
     graf_final <- graf_basico +
-      geom_text(aes(label = ifelse(Periodo == max(base_GN$Periodo), 
-                                   format(round(Valor,0), big.mark = ".", decimal.mark = ","), 
-                                   NA),
-                    color = dentro_fora,
-                    x = Mes + 0.2), family = "Source Sans Pro", hjust = "left", size = 5) +
+      # geom_text(aes(label = ifelse(Periodo == max(base_GN$Periodo), 
+      #                              format(round(Valor,0), big.mark = ".", decimal.mark = ","), 
+      #                              NA),
+      #               color = dentro_fora,
+      #               x = Mes + 0.2), family = "Source Sans Pro", hjust = "left", size = 5) +
       scale_y_continuous(position = "right", 
                          labels = function(x) {format(x, 
                                                       big.mark = ".", 
@@ -193,18 +193,18 @@ gera_graf <- function(indicador) {
                                                       scientific = FALSE)})
   } else if (unidade == "Percentual") {
     graf_final <- graf_basico +
-      geom_text(aes(label = ifelse(Periodo == max(base_GN$Periodo), 
-                                   percent(Valor), 
-                                   NA),
-                    color = dentro_fora,
-                    x = Mes + 0.2), family = "Source Sans Pro", hjust = "left", size = 5) +
+      # geom_text(aes(label = ifelse(Periodo == max(base_GN$Periodo), 
+      #                              percent(Valor), 
+      #                              NA),
+      #               color = dentro_fora,
+      #               x = Mes + 0.2), family = "Source Sans Pro", hjust = "left", size = 5) +
       scale_y_continuous(position = "right", labels = percent)
   } else if (unidade == "Anos") {
     graf_final <- graf_basico +
-      geom_text(aes(label = ifelse(Periodo == max(base_GN$Periodo), 
-                                   paste(format(round(Valor,2), big.mark = ".", decimal.mark = ","), "anos"), NA), 
-                    color = dentro_fora,
-                    x = Mes + 0.2), family = "Source Sans Pro", hjust = "left", size = 5) +
+      # geom_text(aes(label = ifelse(Periodo == max(base_GN$Periodo), 
+      #                              paste(format(round(Valor,2), big.mark = ".", decimal.mark = ","), "anos"), NA), 
+      #               color = dentro_fora,
+      #               x = Mes + 0.2), family = "Source Sans Pro", hjust = "left", size = 5) +
       scale_y_continuous(position = "right")    
   }
   
