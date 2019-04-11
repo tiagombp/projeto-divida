@@ -174,7 +174,7 @@ gera_graf <- function(indicador) {
     scale_color_manual(values = c("Dentro" = "steelblue", "Fora" = "firebrick")) +
     scale_fill_manual(values = c("Dentro" = "steelblue", "Fora" = "firebrick")) +
     labs(x = NULL, y = NULL) +
-    scale_x_discrete(expand = expand_scale(add = c(1.2,1.2))) +
+    scale_x_discrete(expand = expand_scale(add = c(1.2,1))) +
     tema()
   
   unidade <- base$Unidade[1]
@@ -212,9 +212,37 @@ gera_graf <- function(indicador) {
   
 }
 
+ultima_data <- max(base_GN$Periodo)
+
+obtem_ultimo_valor <- function(indicador) {
+  base <- base_GN %>% filter(Indicador == indicador, Periodo == ultima_data)
+  return(base$Valor[1])
+}
+
+obtem_unidade <- function(indicador) {
+  base <- base_GN %>% filter(Indicador == indicador)
+  if (base$Unidade[1] == "Percentual")
+    return("%")
+  else
+    return(base$Unidade[1])
+}
+
 indicadores <- unique(base_GN$Indicador)
+
 lista_graficos <- purrr::map(indicadores, gera_graf)
 names(lista_graficos) <- indicadores
 
-save(lista_graficos, ano_atu, base_GN, file = "GN.RData")
+lista_valores <- purrr::map(indicadores, obtem_ultimo_valor)
+names(lista_valores) <- indicadores
 
+lista_unidades <- purrr::map(indicadores, obtem_unidade)
+names(lista_unidades) <- indicadores
+
+
+save(lista_graficos, lista_valores, ano_atu, base_GN, ultima_data, file = "GN.RData")
+
+#gera_graf("Prefixado")
+#obtem_ultimo_valor("Prefixado")
+#obtem_unidade("Prefixado")
+
+unique(base_GN$Unidade)
