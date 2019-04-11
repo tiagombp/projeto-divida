@@ -216,15 +216,19 @@ ultima_data <- max(base_GN$Periodo)
 
 obtem_ultimo_valor <- function(indicador) {
   base <- base_GN %>% filter(Indicador == indicador, Periodo == ultima_data)
-  return(base$Valor[1])
+  
+  if (base$Unidade[1] == "Percentual") 
+    valor <- scales::percent(round(base$Valor[1],3), decimal.mark = ",")
+  else if (base$Unidade[1] == "Anos")
+    valor <- paste(format(round(base$Valor[1],2), big.mark = ".", decimal.mark = ","), "anos")
+  else
+    valor <- paste("R$", format(round(base$Valor[1],0), big.mark = ".", decimal.mark = ","), "bi")
+  return(valor)
 }
 
 obtem_unidade <- function(indicador) {
   base <- base_GN %>% filter(Indicador == indicador)
-  if (base$Unidade[1] == "Percentual")
-    return("%")
-  else
-    return(base$Unidade[1])
+
 }
 
 indicadores <- unique(base_GN$Indicador)
@@ -235,10 +239,7 @@ names(lista_graficos) <- indicadores
 lista_valores <- purrr::map(indicadores, obtem_ultimo_valor)
 names(lista_valores) <- indicadores
 
-lista_unidades <- purrr::map(indicadores, obtem_unidade)
-names(lista_unidades) <- indicadores
-
-save(lista_graficos, lista_valores, lista_unidades, ano_atu, base_GN, ultima_data, file = "GN.RData")
+save(lista_graficos, lista_valores, ano_atu, base_GN, ultima_data, file = "GN.RData")
 
 #gera_graf("Prefixado")
 #obtem_ultimo_valor("Prefixado")
