@@ -174,7 +174,7 @@ gera_graf <- function(indicador) {
     scale_color_manual(values = c("Dentro" = "steelblue", "Fora" = "firebrick")) +
     scale_fill_manual(values = c("Dentro" = "steelblue", "Fora" = "firebrick")) +
     labs(x = NULL, y = NULL) +
-    scale_x_discrete(expand = expand_scale(add = c(1.2,1))) +
+    #scale_x_discrete(expand = expand_scale(add = c(1,1))) +
     tema()
   
   unidade <- base$Unidade[1]
