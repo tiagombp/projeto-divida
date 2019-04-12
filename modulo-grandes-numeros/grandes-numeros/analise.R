@@ -226,13 +226,8 @@ obtem_ultimo_valor <- function(indicador) {
   else if (base$Unidade[1] == "Anos")
     valor <- paste(format(round(base$Valor[1],2), big.mark = ".", decimal.mark = ","), "anos")
   else
-    valor <- paste("R$", format(round(base$Valor[1],0), big.mark = ".", decimal.mark = ","), "bi")
+    valor <- paste("R$", format(round(base$Valor[1],2), big.mark = ".", decimal.mark = ","), "bi")
   return(valor)
-}
-
-obtem_unidade <- function(indicador) {
-  base <- base_GN %>% filter(Indicador == indicador)
-
 }
 
 indicadores <- unique(base_GN$Indicador)
