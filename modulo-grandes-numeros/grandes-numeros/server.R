@@ -14,14 +14,14 @@ library(scales)
 server = function(input, output, session) { 
   
   load("GN.RData")
+  alturas = 180
   
-  
-  output$EstoqueDPF      <- renderPlot(lista_graficos[["Estoque DPF"]], height = 180)
-  output$Prefixado       <- renderPlot(lista_graficos[["Prefixado"]], height = 250)
-  output$IndicePrecos    <- renderPlot(lista_graficos[["Índice Preços"]], height = 250)
-  output$Flutuante       <- renderPlot(lista_graficos[["Taxa Flutuante"]], height = 250)
-  output$Cambio          <- renderPlot(lista_graficos[["Câmbio"]], height = 250)
-  output$PercentVincendo <- renderPlot(lista_graficos[["% Vincendo em 12 meses"]], height = 250)
-  output$PrazoMedio      <- renderPlot(lista_graficos[["Prazo Médio (anos)"]], height = 250)
+  output$EstoqueDPF      <- renderPlot(lista_graficos[["Estoque DPF"]], height = alturas)
+  output$Prefixado       <- renderPlot(lista_graficos[["Prefixado"]], height = alturas)
+  output$IndicePrecos    <- renderPlot(lista_graficos[["Índice Preços"]], height = alturas)
+  output$Flutuante       <- renderPlot(lista_graficos[["Taxa Flutuante"]], height = alturas)
+  output$Cambio          <- renderPlot(lista_graficos[["Câmbio"]], height = alturas)
+  output$PercentVincendo <- renderPlot(lista_graficos[["% Vincendo em 12 meses"]], height = alturas)
+  output$PrazoMedio      <- renderPlot(lista_graficos[["Prazo Médio (anos)"]], height = alturas)
 }
 
