@@ -149,7 +149,7 @@ gera_graf <- function(indicador) {
   base <- base_GN %>% filter(Indicador == indicador)
   
   graf_basico <- ggplot(base, aes(x = reorder(mes_texto, Mes), group = Ano, y = Valor)) +
-    geom_ribbon(aes(ymin = PAFmin, ymax = PAFmax), fill = "LightBlue") +
+    geom_ribbon(aes(ymin = PAFmin, ymax = PAFmax), fill = "lightcyan") +
     geom_hline(yintercept = base$PAFmin[1], 
                color = "SteelBlue", size = 0.5, linetype = "dotted") +
     geom_hline(yintercept = base$PAFmax[1], 
@@ -244,5 +244,7 @@ save(lista_graficos, lista_valores, ano_atu, base_GN, ultima_data, file = "GN.RD
 #gera_graf("Prefixado")
 #obtem_ultimo_valor("Prefixado")
 #obtem_unidade("Prefixado")
+
+#gera_graf("Estoque DPF") + coord_cartesian(clip = 'off') + annotate(geom = "rect", ymin = 3, ymax = Inf, xmin = 1.9, xmax = 2.1, fill = "yellow", alpha = 0.5) 
 
 unique(base_GN$Unidade)
