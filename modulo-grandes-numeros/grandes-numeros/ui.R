@@ -18,26 +18,42 @@ sidebar <- dashboardSidebar(width =270,
                               menuItem("Grandes Números", tabName = "GrandesNumeros" ,icon = icon("bar-chart-o")))
 )
 
+alturas <- 250
+largura <- 4
+
 body <- dashboardBody(
   tabItems(
     tabItem(tabName = "GrandesNumeros",
             
             fluidRow(
-              box(plotOutput("EstoqueDPF"), title = paste("Estoque DPF:",lista_valores["Estoque DPF"]),
-                  solidHeader = T ,width = 4, height = 250, background = "blue", collapsible = T)
-            ),
-            strong("Composição"),
-            fluidRow(
-              box(plotOutput("Prefixado"), title ="Indexador Prefixado", solidHeader = T , width = 3, height = 350),
-              box(plotOutput("IndicePrecos"), title ="Índice de Preços", solidHeader = T , width = 5, height = 350),
-              box(plotOutput("Flutuante"), title ="Indexador Flutuante", solidHeader = T , width = 6, height = 350),
-              box(plotOutput("Cambio"), title ="Câmbio", solidHeader = T , width = 6, height = 350)
-            ),
-            strong("Estrutura de Vencimentos"),
-            fluidRow(
-              box(plotOutput("PercentVincendo"), title ="% Vincendo em 12 meses", solidHeader = T , width = 6, height = 350),
-              box(plotOutput("PrazoMedio"), title ="Prazo Médio", solidHeader = T , width = 6, height = 350)
-            )
+              box(plotOutput("EstoqueDPF"), 
+                  title = paste("Estoque DPF:", lista_valores["Estoque DPF"]),
+                  solidHeader = T , width = largura, height = alturas, background = "blue"),
+              
+              box(plotOutput("Prefixado"), 
+                  title = paste("Composição Prefixado:", lista_valores["Prefixado"]),
+                  solidHeader = T , width = largura, height = alturas, background = "orange"),
+              
+              box(plotOutput("IndicePrecos"), 
+                  title = paste("Composição Índice de Preços:", lista_valores["Índice Preços"]),
+                  solidHeader = T , width = largura, height = alturas, background = "orange"),
+              
+              box(plotOutput("Flutuante"), 
+                  title = paste("Composição Flutuante:", lista_valores["Taxa Flutuante"]),
+                  solidHeader = T , width = largura, height = alturas, background = "orange"),
+
+              box(plotOutput("Cambio"), 
+                  title = paste("Composição Câmbio:", lista_valores["Câmbio"]),
+                  solidHeader = T , width = largura, height = alturas, background = "orange"),          
+
+              box(plotOutput("PercentVincendo"), 
+                  title = paste("Vincendo em 12 meses:", lista_valores["% Vincendo em 12 meses"]),
+                  solidHeader = T , width = largura, height = alturas, background = "maroon"), 
+
+              box(plotOutput("PrazoMedio"), 
+                  title = paste("Prazo Médio:", lista_valores["Prazo Médio (anos)"]),
+                  solidHeader = T , width = largura, height = alturas, background = "maroon")
+              )
     ))
 )
 
