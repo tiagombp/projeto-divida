@@ -13,7 +13,7 @@ tema <- function(){
       title = element_text(face = "bold", size = 10, color = "#1E4C7A"), 
       plot.subtitle = element_text(family = "Source Sans Pro", 
                                    color = "grey20", face = "plain", size = 10),
-      axis.text = element_text(family = "Source Sans Pro", colour = "grey20", size = 10),
+      axis.text = element_text(family = "Source Sans Pro", colour = "grey20", size = 12),
       plot.caption = element_text(face = "italic"),
       panel.grid.major = element_blank(), 
       panel.grid.minor = element_blank(),
@@ -45,10 +45,10 @@ dados_dpf <- tabela_dpf %>%
          Periodo = as.Date(paste0(Ano, "-",
                                   str_pad(Mes, 2), "-",
                                   "01")),
-         Valor = as.numeric(Valor),
+         Valor = as.numeric(Valor)/1e3,
          Agrupador = "Estoque Nominal",
          Indicador = "Estoque DPF",
-         Unidade = "R$ bi") %>%
+         Unidade = "R$ tri") %>%
   filter(Ano >= ano_atu - 1)
 
 
@@ -143,6 +143,7 @@ base_GN <- dados_grandes_numeros %>%
 
 
 # gera gráficos e salva RData ---------------------------------------------
+ultima_data <- max(base_GN$Periodo)
 
 gera_graf <- function(indicador) {
   base <- base_GN %>% filter(Indicador == indicador)
@@ -171,15 +172,17 @@ gera_graf <- function(indicador) {
     #           family = "Source Sans Pro", size = 3.5, hjust = "right", fontface = "italic",
     #           check_overlap = TRUE) +
     geom_point(aes(color = ifelse(Ano == ano_atu, dentro_fora, NA)), size = 3) +
+    geom_point(aes(color = ifelse(Periodo == ultima_data, dentro_fora, NA)), size = 6, shape = 1) +
     scale_color_manual(values = c("Dentro" = "steelblue", "Fora" = "firebrick")) +
     scale_fill_manual(values = c("Dentro" = "steelblue", "Fora" = "firebrick")) +
+    scale_x_discrete(labels = str_sub(meses, 1, 1)) +
     labs(x = NULL, y = NULL) +
     #scale_x_discrete(expand = expand_scale(add = c(1,1))) +
     tema()
   
   unidade <- base$Unidade[1]
   
-  if (unidade == "R$ bi") {
+  if (unidade == "R$ tri") {
     graf_final <- graf_basico +
       # geom_text(aes(label = ifelse(Periodo == max(base_GN$Periodo), 
       #                              format(round(Valor,0), big.mark = ".", decimal.mark = ","), 
@@ -187,7 +190,8 @@ gera_graf <- function(indicador) {
       #               color = dentro_fora,
       #               x = Mes + 0.2), family = "Source Sans Pro", hjust = "left", size = 5) +
       scale_y_continuous(position = "right", 
-                         labels = function(x) {format(x, 
+                         labels = function(x) {format(x,
+                                                      accuracy = 0.1,
                                                       big.mark = ".", 
                                                       decimal.mark=",", 
                                                       scientific = FALSE)})
@@ -198,7 +202,9 @@ gera_graf <- function(indicador) {
       #                              NA),
       #               color = dentro_fora,
       #               x = Mes + 0.2), family = "Source Sans Pro", hjust = "left", size = 5) +
-      scale_y_continuous(position = "right", labels = percent)
+      scale_y_continuous(position = "right", labels = function(x) {percent(x,
+                                                                           accuracy = 1, 
+                                                                           decimal.mark=",")})
   } else if (unidade == "Anos") {
     graf_final <- graf_basico +
       # geom_text(aes(label = ifelse(Periodo == max(base_GN$Periodo), 
@@ -211,8 +217,6 @@ gera_graf <- function(indicador) {
   return(graf_final)
   
 }
-
-ultima_data <- max(base_GN$Periodo)
 
 obtem_ultimo_valor <- function(indicador) {
   base <- base_GN %>% filter(Indicador == indicador, Periodo == ultima_data)
@@ -241,6 +245,7 @@ names(lista_valores) <- indicadores
 
 save(lista_graficos, lista_valores, ano_atu, base_GN, ultima_data, file = "GN.RData")
 
+#gera_graf("Estoque DPF")
 #gera_graf("Prefixado")
 #obtem_ultimo_valor("Prefixado")
 #obtem_unidade("Prefixado")
