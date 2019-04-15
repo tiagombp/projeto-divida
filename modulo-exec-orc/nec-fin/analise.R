@@ -68,10 +68,18 @@ dados_plotly <- dados_nec_fin %>%
 
 cores <- viridis(7)
 
+formata <- function(x){
+  paste0("R$ ", format(round(x/1e9, 2), big.mark = ".", decimal.mark = ","), " bi")
+}
+
 graf1 <- 
   plot_ly(dados_plotly, x = ~Ano, type = "scatter", fill = 'tozeroy', y = ~`graf_OutDesp`, 
-        name = "Outras Despesas", mode = "none", stackgroup = 'one', fillcolor = cores[1]) %>%
-  add_trace(y = ~Vencimentos, name = "Vencimentos da DPF", fillcolor = cores[2])
+        name = "Outras Despesas", mode = "none", stackgroup = 'one', fillcolor = cores[1],
+        text = ~paste0("Outras Despesas", " (", Ano, "): ", formata(OutrasDesp)),
+        hoverinfo = "text")%>%
+  add_trace(y = ~Vencimentos, name = "Vencimentos da DPF", fillcolor = cores[2],
+            text = ~paste0("Vencimentos", " (", Ano, "): ", formata(Vencimentos)),
+            hoverinfo = "text")
   
   
 
