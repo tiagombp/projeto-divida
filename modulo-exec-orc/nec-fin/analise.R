@@ -80,7 +80,9 @@ graf1 <-
         hoverinfo = "text")%>%
   add_trace(y = ~Vencimentos, name = "Vencimentos da DPF", fillcolor = cores[2],
             text = ~paste0("Vencimentos", " (", Ano, "): ", formata(Vencimentos)),
-            hoverinfo = "text")
+            hoverinfo = "text") %>%
+  layout(xaxis = list(title = "", showgrid = FALSE),
+         yaxis = list(title = "R$ bi", showgrid = FALSE))
 
 graf2 <- 
   plot_ly(dados_plotly, x = ~Ano, type = "scatter", fill = 'tozeroy', y = ~graf_OutDesp, 
@@ -95,7 +97,9 @@ graf2 <-
             hoverinfo = "text") %>%
   add_trace(y = ~Interna, name = "Dívida Interna", fillcolor = cores[5],
             text = ~paste0("Dívida Interna", " (", Ano, "): ", formata(Interna)),
-            hoverinfo = "text")
+            hoverinfo = "text") %>%
+  layout(xaxis = list(title = "", showgrid = FALSE),
+         yaxis = list(title = "R$ bi", showgrid = FALSE))
 
 graf3 <- 
   plot_ly(dados_plotly, x = ~Ano, type = "scatter", fill = 'tozeroy', y = ~graf_OutDesp, 
@@ -115,7 +119,7 @@ graf3 <-
             text = ~paste0("Principal", " (", Ano, "): ", formata(Principal)),
             hoverinfo = "text") %>%
   layout(xaxis = list(title = "", showgrid = FALSE),
-         yaxis = list(title = "", showgrid = FALSE))
+         yaxis = list(title = "R$ bi", showgrid = FALSE))
   
   
   
