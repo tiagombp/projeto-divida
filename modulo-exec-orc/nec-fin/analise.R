@@ -73,13 +73,31 @@ formata <- function(x){
 }
 
 graf1 <- 
-  plot_ly(dados_plotly, x = ~Ano, type = "scatter", fill = 'tozeroy', y = ~`graf_OutDesp`, 
+  plot_ly(dados_plotly, x = ~Ano, type = "scatter", fill = 'tozeroy', y = ~graf_OutDesp, 
         name = "Outras Despesas", mode = "none", stackgroup = 'one', fillcolor = cores[1],
         text = ~paste0("Outras Despesas", " (", Ano, "): ", formata(OutrasDesp)),
         hoverinfo = "text")%>%
   add_trace(y = ~Vencimentos, name = "Vencimentos da DPF", fillcolor = cores[2],
             text = ~paste0("Vencimentos", " (", Ano, "): ", formata(Vencimentos)),
             hoverinfo = "text")
+
+graf2 <- 
+  plot_ly(dados_plotly, x = ~Ano, type = "scatter", fill = 'tozeroy', y = ~graf_OutDesp, 
+          name = "Outras Despesas", mode = "none", stackgroup = 'one', fillcolor = "lightgray",
+          text = ~paste0("Outras Despesas", " (", Ano, "): ", formata(OutrasDesp)),
+          hoverinfo = "text")%>%
+  add_trace(y = ~graf_EncBCB, name = "Encargos do Bacen", fillcolor = cores[3],
+            text = ~paste0("Encargos Bacen", " (", Ano, "): ", formata(`Encargos Bacen`)),
+            hoverinfo = "text") %>%
+  add_trace(y = ~graf_DivEx, name = "Dívida Externa", fillcolor = cores[4],
+            text = ~paste0("Dívida Externa", " (", Ano, "): ", formata(Externa)),
+            hoverinfo = "text") %>%
+  add_trace(y = ~Interna, name = "Dívida Interna", fillcolor = cores[5],
+            text = ~paste0("Dívida Interna", " (", Ano, "): ", formata(Interna)),
+            hoverinfo = "text")
+
+
+  
   
   
 
