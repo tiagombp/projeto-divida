@@ -63,13 +63,14 @@ dados_plotly <- dados_nec_fin %>%
          graf_Juros    = Principal + `Juros e Encargos`,
          graf_DivEx    = graf_Juros + Externa,
          graf_EncBCB   = graf_DivEx + `Encargos Bacen`,
-         graf_OutDesp  = graf_EncBCB + OutrasDesp)
+         graf_OutDesp  = graf_EncBCB + OutrasDesp) %>%
+  mutate_at(vars(-Ano), .funs = ~./1e9)
   
 
 cores <- viridis(7)
 
 formata <- function(x){
-  paste0("R$ ", format(round(x/1e9, 2), big.mark = ".", decimal.mark = ","), " bi")
+  paste0("R$ ", format(round(x, 2), big.mark = ".", decimal.mark = ","), " bi")
 }
 
 graf1 <- 
@@ -96,7 +97,25 @@ graf2 <-
             text = ~paste0("Dívida Interna", " (", Ano, "): ", formata(Interna)),
             hoverinfo = "text")
 
-
+graf3 <- 
+  plot_ly(dados_plotly, x = ~Ano, type = "scatter", fill = 'tozeroy', y = ~graf_OutDesp, 
+          name = "Outras Despesas", mode = "none", stackgroup = 'one', fillcolor = "lightgray",
+          text = ~paste0("Outras Despesas", " (", Ano, "): ", formata(OutrasDesp)),
+          hoverinfo = "text")%>%
+  add_trace(y = ~graf_EncBCB, name = "Encargos do Bacen", fillcolor = "lightgray",
+            text = ~paste0("Encargos Bacen", " (", Ano, "): ", formata(`Encargos Bacen`)),
+            hoverinfo = "text") %>%
+  add_trace(y = ~graf_DivEx, name = "Dívida Externa", fillcolor = "lightgray",
+            text = ~paste0("Dívida Externa", " (", Ano, "): ", formata(Externa)),
+            hoverinfo = "text") %>%
+  add_trace(y = ~graf_Juros, name = "Juros", fillcolor = cores[6],
+            text = ~paste0("Juros", " (", Ano, "): ", formata(`Juros e Encargos`)),
+            hoverinfo = "text") %>%
+  add_trace(y = ~Principal, name = "Principal", fillcolor = cores[7],
+            text = ~paste0("Principal", " (", Ano, "): ", formata(Principal)),
+            hoverinfo = "text") %>%
+  layout(xaxis = list(title = "", showgrid = FALSE),
+         yaxis = list(title = "", showgrid = FALSE))
   
   
   
