@@ -121,6 +121,7 @@ graf3 <-
   layout(xaxis = list(title = "", showgrid = FALSE),
          yaxis = list(title = "R$ bi", showgrid = FALSE))
   
+save(dados_plotly, graf1, graf2, graf3, formata, file = "nec_fin.RData")
   
   
 
