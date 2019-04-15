@@ -61,7 +61,7 @@ ggplot(dados, aes(y = taxa_media, x = data_emissao, color = titulo, size = venci
 
 ggplot(dados, aes(y = taxa_media, x = data_emissao, color = titulo, size = demanda, alpha = vencimento)) + geom_point() + scale_alpha_discrete(rev)
 
-ggplot(dados, aes(y = taxa_media, x = vencimento, color = titulo, size = valor_venda)) + geom_point()
+ggplot(dados %>% filter(vencimento < "2030-01-01"), aes(y = taxa_media, x = vencimento, color = titulo, size = valor_venda)) + geom_point()
 
 
 ggplot_calendar_heatmap(
