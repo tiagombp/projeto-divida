@@ -66,19 +66,16 @@ dados_plotly <- dados_nec_fin %>%
          graf_OutDesp  = graf_EncBCB + OutrasDesp) %>%
   mutate_at(vars(-Ano), .funs = ~./1e9)
   
-
-cores <- viridis(7)
-
 formata <- function(x){
   paste0("R$ ", format(round(x, 2), big.mark = ".", decimal.mark = ","), " bi")
 }
 
 graf1 <- 
   plot_ly(dados_plotly, x = ~Ano, type = "scatter", fill = 'tozeroy', y = ~graf_OutDesp, 
-        name = "Outras Despesas", mode = "none", stackgroup = 'one', fillcolor = cores[1],
+        name = "Outras Despesas", mode = "none", stackgroup = 'one', fillcolor = cores_pasteis[1],
         text = ~paste0("Outras Despesas", " (", Ano, "): ", formata(OutrasDesp)),
-        hoverinfo = "text")%>%
-  add_trace(y = ~Vencimentos, name = "Vencimentos da DPF", fillcolor = cores[2],
+        hoverinfo = "text", line = list(color = "white", width = 1, shape = "spline"))%>%
+  add_trace(y = ~Vencimentos, name = "Vencimentos da DPF", fillcolor = cores_pasteis[2], line = list(color = "white", width = 1, shape = "spline"),
             text = ~paste0("Vencimentos", " (", Ano, "): ", formata(Vencimentos)),
             hoverinfo = "text") %>%
   layout(xaxis = list(title = "", showgrid = FALSE),
@@ -88,16 +85,16 @@ graf2 <-
   plot_ly(dados_plotly, x = ~Ano, type = "scatter", fill = 'tozeroy', y = ~graf_OutDesp, 
           name = "Outras Despesas", mode = "none", stackgroup = 'one', fillcolor = "lightgray",
           text = ~paste0("Outras Despesas", " (", Ano, "): ", formata(OutrasDesp)),
-          hoverinfo = "text")%>%
-  add_trace(y = ~graf_EncBCB, name = "Encargos do Bacen", fillcolor = cores[3],
+          hoverinfo = "text", line = list(color = "white", width = 1, shape = "spline"))%>%
+  add_trace(y = ~graf_EncBCB, name = "Encargos do Bacen", fillcolor = cores_pasteis[3], color = "white",
             text = ~paste0("Encargos Bacen", " (", Ano, "): ", formata(`Encargos Bacen`)),
-            hoverinfo = "text") %>%
-  add_trace(y = ~graf_DivEx, name = "Dívida Externa", fillcolor = cores[4],
+            hoverinfo = "text", line = list(color = "white", width = 1, shape = "spline")) %>%
+  add_trace(y = ~graf_DivEx, name = "Dívida Externa", fillcolor = cores_pasteis[4],
             text = ~paste0("Dívida Externa", " (", Ano, "): ", formata(Externa)),
-            hoverinfo = "text") %>%
-  add_trace(y = ~Interna, name = "Dívida Interna", fillcolor = cores[5],
+            hoverinfo = "text", line = list(color = "white", width = 1, shape = "spline")) %>%
+  add_trace(y = ~Interna, name = "Dívida Interna", fillcolor = cores_pasteis[5],
             text = ~paste0("Dívida Interna", " (", Ano, "): ", formata(Interna)),
-            hoverinfo = "text") %>%
+            hoverinfo = "text", line = list(color = "white", width = 1, shape = "spline")) %>%
   layout(xaxis = list(title = "", showgrid = FALSE),
          yaxis = list(title = "R$ bi", showgrid = FALSE))
 
@@ -105,19 +102,19 @@ graf3 <-
   plot_ly(dados_plotly, x = ~Ano, type = "scatter", fill = 'tozeroy', y = ~graf_OutDesp, 
           name = "Outras Despesas", mode = "none", stackgroup = 'one', fillcolor = "lightgray",
           text = ~paste0("Outras Despesas", " (", Ano, "): ", formata(OutrasDesp)),
-          hoverinfo = "text")%>%
+          hoverinfo = "text", line = list(color = "white", width = 1, shape = "spline"))%>%
   add_trace(y = ~graf_EncBCB, name = "Encargos do Bacen", fillcolor = "lightgray",
             text = ~paste0("Encargos Bacen", " (", Ano, "): ", formata(`Encargos Bacen`)),
-            hoverinfo = "text") %>%
+            hoverinfo = "text", line = list(color = "white", width = 1, shape = "spline")) %>%
   add_trace(y = ~graf_DivEx, name = "Dívida Externa", fillcolor = "lightgray",
             text = ~paste0("Dívida Externa", " (", Ano, "): ", formata(Externa)),
-            hoverinfo = "text") %>%
-  add_trace(y = ~graf_Juros, name = "Juros", fillcolor = cores[6],
+            hoverinfo = "text", line = list(color = "white", width = 1, shape = "spline")) %>%
+  add_trace(y = ~graf_Juros, name = "Juros", fillcolor = cores_pasteis[6],
             text = ~paste0("Juros", " (", Ano, "): ", formata(`Juros e Encargos`)),
-            hoverinfo = "text") %>%
-  add_trace(y = ~Principal, name = "Principal", fillcolor = cores[7],
+            hoverinfo = "text", line = list(color = "white", width = 1, shape = "spline")) %>%
+  add_trace(y = ~Principal, name = "Principal", fillcolor = cores_pasteis[7],
             text = ~paste0("Principal", " (", Ano, "): ", formata(Principal)),
-            hoverinfo = "text") %>%
+            hoverinfo = "text", line = list(color = "white", width = 1, shape = "spline")) %>%
   layout(xaxis = list(title = "", showgrid = FALSE),
          yaxis = list(title = "R$ bi", showgrid = FALSE))
   
