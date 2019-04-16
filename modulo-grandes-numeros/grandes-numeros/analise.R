@@ -240,7 +240,8 @@ names(lista_graficos) <- indicadores
 lista_valores <- purrr::map(indicadores, obtem_ultimo_valor)
 names(lista_valores) <- indicadores
 
-save(lista_graficos, lista_valores, base_GN, ultima_data, file = "GN.RData")
+#save(lista_graficos, lista_valores, base_GN, ultima_data, file = "GN.RData")
+save(tema, gera_graf, ano_atu, meses, lista_valores, base_GN, ultima_data, file = "GN.RData")
 
 #gera_graf("Estoque DPF")
 #gera_graf("Prefixado")

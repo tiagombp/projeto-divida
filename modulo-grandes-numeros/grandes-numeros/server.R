@@ -1,19 +1,21 @@
-#
-# This is the server logic of a Shiny web application. You can run the 
-# application by clicking 'Run App' above.
-#
-# Find out more about building applications with Shiny here:
-# 
-#    http://shiny.rstudio.com/
-#
 library(shiny)
 library(shinydashboard)
 library(flexdashboard)
 library(scales)
+library(tidyverse)
+
+load("GN.RData")
+
+# preparacao (estava no analise.R, agora trouxe pra cá)
+
+indicadores <- unique(base_GN$Indicador)
+lista_graficos <- purrr::map(indicadores, gera_graf)
+names(lista_graficos) <- indicadores
+
+# fim preparacao
 
 server = function(input, output, session) { 
   
-  load("GN.RData")
   alturas = 180
   
   output$EstoqueDPF      <- renderPlot(lista_graficos[["Estoque DPF"]], height = alturas)
