@@ -39,7 +39,7 @@ azul_claro     <- "#2c90bf" # "#87b1d4"
 
 # importacao e preparacao inicial dos dados -------------------------------
 
-tabela <- read_excel("../Anexo_RMD_Dez_18.xlsx", skip = 4, sheet = "2.9")
+tabela <- read_excel("Anexo_RMD_Dez_18.xlsx", skip = 4, sheet = "2.9")
 
 # correção de nomes de colunas duplicados
 colnames(tabela)[which(colnames(tabela) == "Out/16")+1] <- "Nov/16"
