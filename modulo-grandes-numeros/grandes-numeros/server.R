@@ -4,15 +4,15 @@ library(flexdashboard)
 library(scales)
 library(tidyverse)
 
-load("GN.RData")
+load("GN.RData", envir=.GlobalEnv)
 
-# preparacao (estava no analise.R, agora trouxe pra cá)
-
-indicadores <- unique(base_GN$Indicador)
-lista_graficos <- purrr::map(indicadores, gera_graf)
-names(lista_graficos) <- indicadores
-
-# fim preparacao
+# # preparacao (estava no analise.R, agora trouxe pra cá)
+# 
+# indicadores <- unique(base_GN$Indicador)
+# lista_graficos <- purrr::map(indicadores, gera_graf)
+# names(lista_graficos) <- indicadores
+# 
+# # fim preparacao
 
 server = function(input, output, session) { 
   
