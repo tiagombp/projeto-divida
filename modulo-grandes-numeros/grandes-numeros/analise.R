@@ -26,13 +26,15 @@ tema <- function(){
 }
 
 radical_nome_arq <- "Anexo_RMD_"
-ano_atu <- 2019
+#ano_atu <- 2019
 meses <- c("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
 
 
 # DPF ---------------------------------------------------------------------
 
 tabela_dpf <- read_excel("Anexo_RMD_Fev_19.xlsx", sheet = "2.1", skip = 4)
+
+ano_atu <- as.numeric(paste0("20", str_sub(names(tabela_dpf)[length(names(tabela_dpf))], 5, 6)))
 
 dados_dpf <- tabela_dpf %>% 
   rename(rotulos = 1) %>%
@@ -238,7 +240,7 @@ names(lista_graficos) <- indicadores
 lista_valores <- purrr::map(indicadores, obtem_ultimo_valor)
 names(lista_valores) <- indicadores
 
-save(lista_graficos, lista_valores, ano_atu, base_GN, ultima_data, file = "GN.RData")
+save(lista_graficos, lista_valores, base_GN, ultima_data, file = "GN.RData")
 
 #gera_graf("Estoque DPF")
 #gera_graf("Prefixado")
@@ -247,4 +249,4 @@ save(lista_graficos, lista_valores, ano_atu, base_GN, ultima_data, file = "GN.RD
 
 #gera_graf("Estoque DPF") + coord_cartesian(clip = 'off') + annotate(geom = "rect", ymin = 3, ymax = Inf, xmin = 1.9, xmax = 2.1, fill = "yellow", alpha = 0.5) 
 
-unique(base_GN$Unidade)
+#unique(base_GN$Unidade)
