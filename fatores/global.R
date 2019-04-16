@@ -6,6 +6,7 @@ library(readxl)
 library(tidyverse)
 library(stringr)
 library(purrr)
+library(RColorBrewer)
 
 
 # definicao do tema -------------------------------------------------------
