@@ -1,3 +1,11 @@
+library(tidyverse)
+library(lubridate)
+library(shiny)
+library(shinydashboard)
+library(flexdashboard)
+library(plotly)
+library(RColorBrewer)
+library(scales)
 
 header <- dashboardHeader(title = "Dívida Pública Federal", titleWidth = 270, tags$li(class="dropdown", tags$a(href="https://github.com/gt-cead", icon("github"), "Source Code", target ="_blank")))
 
