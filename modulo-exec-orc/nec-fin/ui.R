@@ -1,13 +1,13 @@
 header <- dashboardHeader(title = "Dívida Pública Federal", titleWidth = 270, tags$li(class="dropdown", tags$a(href="https://github.com/gt-cead", icon("github"), "Source Code", target ="_blank")))
 
 sidebar <- dashboardSidebar(width =270,
-                            
+
                             sidebarSearchForm(label = "Procurar", "searchText", "searchButton"),
                             sidebarMenu(
                               # Setting id makes input$tabs give the tabName of currently-selected tab
-                              
+
                               id = "tabs",
-                              
+
                               menuItem("Execução Orçamentária", tabName = "estoque" ,icon = icon("bar-chart-o"),
                                        menuSubItem("Necessidades de Financiamento", tabName = "nec-fin"))
                               )
@@ -16,14 +16,16 @@ sidebar <- dashboardSidebar(width =270,
 body <- dashboardBody(
   
   tabItem(tabName = "nec-fin",
-          tags$head(tags$script(src = "message-handler.js")),
-          fluidRow(
-            fluidRow(
-              actionButton("graf1", "Necessidades de Financiamento"),
-              actionButton("graf2", "Vencimentos da Dívida Pública Federal"),
-              actionButton("graf3", "Dívida Interna")
+          fluidPage(
+            tags$head(tags$script(src = "message-handler.js")),
+            fluidRow(align = "center",
+              column(3, align = "center", h5("Necessidades de Financiamento"), actionButton("graf1", "1")),
+              column(3, h5("Vencimentos da Dívida Pública Federal"), actionButton("graf2", "2")),
+              column(3, h5("Dívida Pública Federal Interna"), actionButton("graf3", "3"))
             ),
+            br(),
             plotlyOutput("grafico")
+          )
             
             
             # tabBox(id="graf_fatores", width = 1000, height=600,
@@ -43,6 +45,5 @@ body <- dashboardBody(
             #        )
             )
           )
-  )
 
 ui = dashboardPage(header, sidebar, body)

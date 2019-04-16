@@ -75,18 +75,18 @@ graf1 <-
         name = "Outras Despesas", mode = "none", stackgroup = 'one', fillcolor = cores_pasteis[1],
         text = ~paste0("Outras Despesas", " (", Ano, "): ", formata(OutrasDesp)),
         hoverinfo = "text", line = list(color = "white", width = 1, shape = "spline"))%>%
-  add_trace(y = ~Vencimentos, name = "Vencimentos da DPF", fillcolor = cores_pasteis[2], line = list(color = "white", width = 1, shape = "spline"),
+  add_trace(y = ~Vencimentos, name = "Vencimentos DPF", fillcolor = cores_pasteis[2], line = list(color = "white", width = 1, shape = "spline"),
             text = ~paste0("Vencimentos", " (", Ano, "): ", formata(Vencimentos)),
             hoverinfo = "text") %>%
   layout(xaxis = list(title = "", showgrid = FALSE),
-         yaxis = list(title = "R$ bi", showgrid = FALSE))
+         yaxis = list(title = "R$ bi", showgrid = FALSE, zerolinecolor = "white"))
 
 graf2 <- 
   plot_ly(dados_plotly, x = ~Ano, type = "scatter", fill = 'tozeroy', y = ~graf_OutDesp, 
           name = "Outras Despesas", mode = "none", stackgroup = 'one', fillcolor = "lightgray",
           text = ~paste0("Outras Despesas", " (", Ano, "): ", formata(OutrasDesp)),
           hoverinfo = "text", line = list(color = "white", width = 1, shape = "spline"))%>%
-  add_trace(y = ~graf_EncBCB, name = "Encargos do Bacen", fillcolor = cores_pasteis[3], color = "white",
+  add_trace(y = ~graf_EncBCB, name = "Encargos Bacen", fillcolor = cores_pasteis[3], color = "white",
             text = ~paste0("Encargos Bacen", " (", Ano, "): ", formata(`Encargos Bacen`)),
             hoverinfo = "text", line = list(color = "white", width = 1, shape = "spline")) %>%
   add_trace(y = ~graf_DivEx, name = "Dívida Externa", fillcolor = cores_pasteis[4],
@@ -96,14 +96,14 @@ graf2 <-
             text = ~paste0("Dívida Interna", " (", Ano, "): ", formata(Interna)),
             hoverinfo = "text", line = list(color = "white", width = 1, shape = "spline")) %>%
   layout(xaxis = list(title = "", showgrid = FALSE),
-         yaxis = list(title = "R$ bi", showgrid = FALSE))
+         yaxis = list(title = "R$ bi", showgrid = FALSE, zerolinecolor = "white"))
 
 graf3 <- 
   plot_ly(dados_plotly, x = ~Ano, type = "scatter", fill = 'tozeroy', y = ~graf_OutDesp, 
           name = "Outras Despesas", mode = "none", stackgroup = 'one', fillcolor = "lightgray",
           text = ~paste0("Outras Despesas", " (", Ano, "): ", formata(OutrasDesp)),
           hoverinfo = "text", line = list(color = "white", width = 1, shape = "spline"))%>%
-  add_trace(y = ~graf_EncBCB, name = "Encargos do Bacen", fillcolor = "lightgray",
+  add_trace(y = ~graf_EncBCB, name = "Encargos Bacen", fillcolor = "lightgray",
             text = ~paste0("Encargos Bacen", " (", Ano, "): ", formata(`Encargos Bacen`)),
             hoverinfo = "text", line = list(color = "white", width = 1, shape = "spline")) %>%
   add_trace(y = ~graf_DivEx, name = "Dívida Externa", fillcolor = "lightgray",
@@ -116,7 +116,7 @@ graf3 <-
             text = ~paste0("Principal", " (", Ano, "): ", formata(Principal)),
             hoverinfo = "text", line = list(color = "white", width = 1, shape = "spline")) %>%
   layout(xaxis = list(title = "", showgrid = FALSE),
-         yaxis = list(title = "R$ bi", showgrid = FALSE))
+         yaxis = list(title = "R$ bi", showgrid = FALSE, zerolinecolor = "white"))
   
 save(dados_plotly, graf1, graf2, graf3, formata, file = "nec_fin.RData")
   
