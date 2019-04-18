@@ -28,8 +28,13 @@ gera_base <- function(arq) {
   
   names(tabela_leiloes) <- ajusta_cabecalhos$titulos
   
+  
+  linha_final <- which(str_detect(tabela_leiloes$`Comunicado/Portaria Tipo`, "Total liquidado em"))
+  linha_final <- ifelse(length(linha_final) > 0, linha_final, length(tabela_leiloes$`Comunicado/Portaria Tipo`))
+  
   dados <- tabela_leiloes %>%
-    filter(row_number() > 1) %>%
+    filter(row_number() > 1 & row_number() <= linha_final) %>%
+    filter(!is.na(`Comunicado/Portaria Tipo`)) %>%
     select(-`Data-Base`) %>%
     rename(Data_emissao   = `Data de Emissão`,
            taxa_media     = `Taxas (% a.a.) (b) Média`,
@@ -37,10 +42,10 @@ gera_base <- function(arq) {
            titulo         = `Título`,
            valor_venda    = `Venda R$ Milhões`, #\r\n
            Data_vencimento     = `Data de Vencimento`) %>%
-           titulo_vcto    = paste(titulo, Data_vencimento),
+    mutate(titulo_vcto    = paste(titulo, Data_vencimento),
            taxa_media     = as.numeric(taxa_media)) %>%
-    mutate_at(vars(starts_with("Data")), .funs = ~ifelse(as.character(.),
-                                                         as.Date(as.numeric(.), origin = "1899-12-30")
+    mutate_at(vars(starts_with("Data")), .funs = ~ifelse(class(.)[1] == "character",
+                                                         as.Date(as.numeric(.), origin = "1899-12-30"),
                                                          as.Date(.)))
   
   return(dados)
@@ -63,7 +68,7 @@ base <- bind_rows(teste)
 
 # área de testes ----------------------------------------------------------
 
-arq_teste <- "Anexo RMD Agosto 2010.xlsx"
+arq_teste <- "Anexo_RMD_Abr_2014.xlsx"
 tabela_leiloes <- read_excel(arq_teste, sheet = "1.4", skip = 3)
 str(dados %>% select(starts_with("Data")))
 
